@@ -1,0 +1,58 @@
+﻿@inject IPerson PersonService
+
+<PageTitle>Add Team Member</PageTitle>
+
+<div style="border: 1px solid black;" class="p-2 mt-5 w-100">
+    <h1>Add Team Member</h1>
+
+    <EditForm Model="@_personVM" OnValidSubmit="@HandleTeamMemberSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="form-group">
+            <label>First Name</label>
+            <InputText class="form-control" @bind-Value=_personVM.FirstName />
+            <label>Last Name</label>
+            <InputText id="" class="form-control" @bind-Value=_personVM.LastName />
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value=_personVM.EmailAddress />
+            <label>Cellphone</label>
+            <InputText class="form-control" @bind-Value=_personVM.PhoneNumber />
+            <div class="form-check-inline mt-3">
+                <button class="btn btn-outline-primary" type="submit">Create Member</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    TeamVM _teamVM = new();
+    PersonVM _personVM = new();
+    private string selectedValue = null!;
+
+    [Parameter]
+    public EventCallback<PersonVM> OnClickCallback { get; set; }
+
+
+    private async Task HandleTeamMemberSubmit()
+    {
+        try
+        {
+
+            var person = new PersonVM(_personVM.FirstName, _personVM.LastName, _personVM.EmailAddress, _personVM.PhoneNumber);
+
+            var entity = await PersonService.CreatePerson(person.Person);
+
+            await OnClickCallback.InvokeAsync(new PersonVM(entity));
+
+            _personVM = new();
+
+
+        } catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+    }
+
+}
+

@@ -1,0 +1,139 @@
+﻿@inject IPerson PersonService
+@inject ITeam TeamService
+
+<PageTitle>Create Team</PageTitle>
+
+<EditForm Model="@_teamVM" OnValidSubmit="@CreateTeam">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="position-relative">
+        <div class="form-group w-25">
+            <label>Team Name: </label>
+            <InputText id="" class="form-control" @bind-Value=_teamVM.TeamName/>
+        </div>
+
+        <div style="min-height:250px; min-width: 300px; position:absolute; top:0; right: 22%; border:1px solid black;">
+            <ul class="list-group">
+                @foreach(var person in _selectedTeamMembersList)
+                {
+                    <li class="list-group-item">
+                        <button @onclick="@(e => selectedTeamMemberInList = person.FullName)" class="list-group-item list-group-item-action" type="button">@person.FullName</button>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="mt-2">
+        <label>Select Team Member</label>
+        <div class="d-flex gap-5">
+            <InputSelect class="form-select w-25" @bind-Value="selectedTeamMember">
+                <option disabled selected value> -- select an option -- </option>
+                @foreach(var member in _teamMembersList)
+                {
+                    <option>@member.FullName</option>
+                }
+            </InputSelect>
+
+            <button @onclick="AddToTeamList" class="btn btn-primary" type="button">></button>
+
+            <button style="margin-left:22rem;" @onclick="DeleteSelectedTeamMember" class="btn btn-secondary" type="button">Remove From List</button>
+         </div>
+     </div>
+
+     <button style="margin-top: 1rem;" class="btn btn-primary" type="submit">Create Team</button>
+</EditForm>
+
+<AddTeamMember OnClickCallback="@AddToTeamDropDown"/>
+
+@code {
+    private TeamVM _teamVM = new();
+
+    private List<PersonVM> _teamMembersList = new();
+    private List<PersonVM> _selectedTeamMembersList = new();
+
+    private string? selectedTeamMember;
+    private string? selectedTeamMemberInList;
+
+    [Parameter]
+    public EventCallback<TeamVM> OnClickCallBack { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var teamMembers = await PersonService.List();
+
+        foreach (var person in teamMembers)
+        {
+            _teamMembersList.Add(new PersonVM(person));
+        }
+
+     }
+
+
+    private void AddToTeamDropDown(PersonVM person)
+    {
+        _teamMembersList.Add(person);
+
+    }
+
+    private void AddToTeamList()
+    {
+        if (selectedTeamMember == null) return;
+
+        var member = _teamMembersList.Find(x => x.FullName.Trim() == selectedTeamMember);
+
+        if (member == null) return;
+
+        if (_selectedTeamMembersList.Contains(member)) return;
+
+        _selectedTeamMembersList.Add(member);
+
+    }
+
+    private void DeleteSelectedTeamMember()
+    {
+        if (selectedTeamMemberInList == null) return;
+
+        var member = _selectedTeamMembersList.Find(x => x.FullName == selectedTeamMemberInList);
+
+        if (member == null) return;
+
+        _selectedTeamMembersList.Remove(member);
+    }
+
+    private async Task CreateTeam()
+    {
+
+        if (_selectedTeamMembersList.Count == 0) return;
+
+        try
+        {
+
+            //Create a team record in the database
+            var team = new TeamVM(_teamVM.TeamName, _selectedTeamMembersList);
+
+            await TeamService.Add(team.Team);
+
+            _selectedTeamMembersList.Clear();
+
+            await OnClickCallBack.InvokeAsync(_teamVM);
+
+            _teamVM = new();
+
+            await OnClose.InvokeAsync();
+
+        }
+        catch (Exception ex)
+        {
+           
+
+        }
+
+    }
+
+
+}

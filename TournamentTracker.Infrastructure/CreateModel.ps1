@@ -1,0 +1,1 @@
+﻿dotnet ef dbcontext scaffold "Data Source=DESKTOP-6QE2B0K;Initial Catalog=TournamentTracker;Integrated Security=True; TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer --output-dir TournamentTracker.Infrastructure.Models -f -d -v

@@ -1,0 +1,96 @@
+﻿@page "/"
+
+<PageTitle>Tournament Dashboard</PageTitle>
+
+@if(isVisible){
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
+
+<div class="d-flex align-items-center flex-column">
+    <h1>Tournament Dashboard</h1>
+    <div class="flex-fill">
+            <label>Load Existing Tournament</label>
+            <select class="form-select" @onchange="OnTournamentChange">
+                    <option disabled selected value> -- select an option -- </option>
+                    @foreach(var tournament in _tournaments)
+                    {
+                        <option value=@tournament.Id>@tournament.TournamentName</option>
+                    }
+            </select>
+    </div>
+    <div class="d-flex flex-column gap-2 mt-4">
+        <button @onclick="@LoadTournament" class="btn btn-secondary" type="button">Load Tournament</button>
+        <button @onclick="@CreateTournament" class="btn-lg btn-primary" type="button">Create Tournament</button>
+    </div>
+</div>
+
+@inherits AbstractComponent
+@inject ITournament TournamentService
+@inject NavigationManager Navigation
+
+@code {
+    private List<TournamentVM> _tournaments = new();
+    private TournamentVM _tournamentVM = new();
+    private string? _selectedTournamentValue = null;
+    private int _selectedTournamentId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tournaments = await TournamentService.List();
+
+        foreach (var tournament in tournaments)
+        {
+            var entry = new TournamentVM(tournament);
+
+            _tournaments.Add(entry);
+
+        }
+
+    }
+
+    private void OnTournamentChange(ChangeEventArgs e) {
+
+        if(e.Value == null) return;
+
+        int number;
+
+        bool success = int.TryParse(e.Value.ToString(), out number);
+
+        if (success)
+        {
+            _selectedTournamentId = number;
+        }
+        else
+        {
+            _selectedTournamentId = 0;
+        }
+
+    }
+
+    private void LoadTournament()
+    {
+        if (_selectedTournamentId == 0)
+        {
+            isVisible = true;
+
+            ErrorMessage = "Please select a tournament!";
+
+            return;
+        }
+        else
+        {
+            isVisible = false;
+            ErrorMessage = string.Empty;
+        }
+
+        Navigation.NavigateTo($"/tournament/{_selectedTournamentId}");
+
+    }
+
+    private void CreateTournament()
+    {
+        Navigation.NavigateTo("/createtournament");
+
+    }
+
+}
