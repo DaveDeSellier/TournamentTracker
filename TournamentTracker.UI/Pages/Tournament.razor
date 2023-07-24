@@ -44,18 +44,38 @@
                     </ul>    
                 }
         </div>
-        <div class="flex-fill align-self-center h-auto">
-            <h2>@_teamOne</h2>
-            <label>Score</label>
-            <input @bind="@_scoreOfTeamOne" type="text" />
-            <div class="d-flex w-50 mt-3">
-                <span class="text-center align-self-center flex-fill">-VS-</span>
-                <button @onclick="SaveScore" class="btn btn-primary flex-shrink-1">Score</button>
+        @if (_currentMatchup != null)
+        {
+            <div class="flex-fill align-self-center h-auto">
+                <h2>@_teamOne</h2>
+                <label>Score</label>
+                @if(_currentMatchup.WinnerId == null){
+                    <input @bind="@_scoreOfTeamOne" type="text" />
+                }
+                else
+                {
+                    <input @bind="@_scoreOfTeamOne" type="text" disabled/>
+                }
+                <div class="d-flex w-50 mt-3">
+                    <span class="text-center align-self-center flex-fill">-VS-</span>
+                    @if (_currentMatchup.WinnerId == null)
+                    {
+                        <button @onclick="SaveScore" class="btn btn-primary flex-shrink-1">Score</button>
+                    }else{
+                        <button @onclick="SaveScore" class="btn btn-primary flex-shrink-1" disabled>Score</button>
+                    }
+                </div>
+                <h2>@_teamTwo</h2>
+                <label>Score</label>
+                @if(_currentMatchup.WinnerId == null){
+                    <input @bind="@_scoreOfTeamTwo" type="text" />
+                }
+                else
+                {
+                    <input @bind="@_scoreOfTeamTwo" type="text" disabled/>
+                }
             </div>
-            <h2>@_teamTwo</h2>
-            <label>Score</label>
-            <input @bind="@_scoreOfTeamTwo" type="text" />
-        </div>
+        }
     </div>
 </div>
 
@@ -103,6 +123,7 @@
         _scoreOfTeamTwo = null;
         _teamOne = string.Empty;
         _teamTwo = string.Empty;
+        _currentMatchup = null;
 
     }
 
@@ -131,7 +152,7 @@
                 await MatchUpEntryService.Edit(matchupEntry[0]);
             }
 
-             await MatchupService.Edit(matchup);
+            await MatchupService.Edit(matchup);
 
         }//Non-bye matchup
         else if (matchup?.MatchupEntries.Count == 2 )
@@ -163,7 +184,7 @@
 
         //If there isn't a matchupEntry that means it's the last round
         await MatchupService.Edit(matchup);
-        
+
 
     }
 
@@ -190,6 +211,7 @@
         _teamTwo = string.Empty;
         _scoreOfTeamOne = null;
         _scoreOfTeamTwo = null;
+        _currentMatchup = null;
     }
 
     private List<int> LoadRounds()
@@ -230,7 +252,7 @@
 
             @foreach (var matchupEntry in matchup.MatchupEntries)
             {
-                if (matchupEntry.TeamCompeting == null) break;
+                //if (matchupEntry.TeamCompeting == null) break;
 
                 MatchupEntryVM vm = new MatchupEntryVM(matchupEntry);
                 
@@ -240,7 +262,19 @@
                 }
                 else
                 {
-                    if (s.Length != 0)
+                    if (matchupEntry.TeamCompeting == null)
+                    {
+                        if (s.Length == 0)
+                        {
+                            s = "TBD" + s;
+                        }
+                        else
+                        {
+                            s = s + " VS. TBD";
+                        }
+                    }
+
+                    else if (s.Length != 0)
                     {
                         s = $"{s} VS. {matchupEntry.TeamCompeting.TeamName}";
                     }
