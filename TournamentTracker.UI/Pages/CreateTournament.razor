@@ -122,6 +122,7 @@
 </div>
 
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 @code {
 
@@ -365,6 +366,8 @@
             _tournamentVM = new();
             _selectedPrizeList.Clear();
             _selectedTeamList.Clear();
+
+            Navigation.NavigateTo("/");
 
         }
         catch (Exception ex)
