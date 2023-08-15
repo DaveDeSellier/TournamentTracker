@@ -36,14 +36,26 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var tournaments = await TournamentService.List();
 
-        foreach (var tournament in tournaments)
+        isVisible = false;
+        ErrorMessage = "";
+
+        try
         {
-            var entry = new TournamentVM(tournament);
+            var tournaments = await TournamentService.List();
 
-            _tournaments.Add(entry);
+            foreach (var tournament in tournaments)
+            {
+                var entry = new TournamentVM(tournament);
 
+                _tournaments.Add(entry);
+
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
     }
@@ -69,6 +81,10 @@
 
     private void LoadTournament()
     {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
         if (_selectedTournamentId == 0)
         {
             isVisible = true;
@@ -76,11 +92,6 @@
             ErrorMessage = "Please select a tournament!";
 
             return;
-        }
-        else
-        {
-            isVisible = false;
-            ErrorMessage = string.Empty;
         }
 
         Navigation.NavigateTo($"/tournament/{_selectedTournamentId}");

@@ -1,6 +1,9 @@
-﻿@inject IPrize _service
+﻿<PageTitle>Create Prize</PageTitle>
 
-<PageTitle>Create Prize</PageTitle>
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
 
 <div>
     <EditForm Model="@_prizeVM" OnValidSubmit="@HandleSubmit">
@@ -23,6 +26,9 @@
     </EditForm>
 </div>
 
+@inherits AbstractComponent
+@inject IPrize _service
+
 @code {
 
     private PrizeVM _prizeVM = new();
@@ -32,6 +38,12 @@
 
     [Parameter]
     public EventCallback OnClose { get; set; }
+
+    protected override void OnInitialized()
+    {
+        isVisible = false;
+        ErrorMessage = "";
+    }
 
     private async Task HandleSubmit()
     {
@@ -50,7 +62,8 @@
 
         } catch(Exception ex)
         {
-            Console.WriteLine(ex);
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
     }

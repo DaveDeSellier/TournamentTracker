@@ -1,8 +1,11 @@
 ﻿@page "/tournament/{Id:int}"
-@using TournamentTracker.Core.Utils
-@using TournamentTracker.Infrastructure.Specifications
 
 <PageTitle>Tournament</PageTitle>
+
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
 
 @if (isLoading)
 {
@@ -82,6 +85,7 @@
 @inject ITournament TournamentService
 @inject IMatchup MatchupService
 @inject IMatchupEntry MatchUpEntryService
+@inherits AbstractComponent
 
 @code {
 
@@ -102,14 +106,24 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        var tournament = await TournamentService.List(new TournamentSpecification(Id));
-
-        if (tournament != null)
+        try
         {
-            _tournamentVM = new TournamentVM(tournament[0], Id); 
-            isLoading = false;
-            _rounds = LoadRounds();
+            var tournament = await TournamentService.List(new TournamentSpecification(Id));
+
+            if (tournament != null)
+            {
+                _tournamentVM = new TournamentVM(tournament[0], Id); 
+                isLoading = false;
+                _rounds = LoadRounds();
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
     }
@@ -129,69 +143,88 @@
 
     private async Task SaveScore()
     {
-        List<MatchupEntry> matchupEntry = new();
-        Matchup? matchup = null;
-        Team? winner = null;
 
-        if (_currentMatchup == null) return;
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        matchup = await MatchupService.GetById(_currentMatchup.Id);
-        matchupEntry = await MatchUpEntryService.List(x => x.ParentMatchupId == _currentMatchup.Id);
-
-        //If matchup has yet to be determined 
-
-        if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries[0].TeamCompeting == null && _currentMatchup.MatchupEntries[1].TeamCompeting == null)
+        try
         {
-            return;
-        }
+            List<MatchupEntry> matchupEntry = new();
+            Matchup? matchup = null;
 
-        //Bye matchup
-        if (matchup.MatchupEntries.Count == 1)
-        {
-            matchup.MatchupEntries[0].Score = null;
-            matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+            if (_currentMatchup == null) return;
 
+            matchup = await MatchupService.GetById(_currentMatchup.Id);
+            matchupEntry = await MatchUpEntryService.List(x => x.ParentMatchupId == _currentMatchup.Id);
 
-            if (matchupEntry.Count > 0)
-            {
-                matchupEntry[0].TeamCompeting = matchup.Winner;
-                await MatchUpEntryService.Edit(matchupEntry[0]);
-            }
+            //If matchup has yet to be determined 
 
-            await MatchupService.Edit(matchup);
-
-        }//Non-bye matchup
-        else if (matchup?.MatchupEntries.Count == 2 )
-        {
-            matchup.MatchupEntries[0].Score = _scoreOfTeamOne;
-            matchup.MatchupEntries[1].Score = _scoreOfTeamTwo;
-
-
-            if (_scoreOfTeamOne == _scoreOfTeamTwo)
+            if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries[0].TeamCompeting == null && _currentMatchup.MatchupEntries[1].TeamCompeting == null)
             {
                 return;
             }
-            else if (_scoreOfTeamOne > _scoreOfTeamTwo)
+
+            //Bye matchup
+            if (matchup.MatchupEntries.Count == 1)
             {
+                matchup.MatchupEntries[0].Score = null;
                 matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
 
-            }
-            else
+
+                if (matchupEntry.Count > 0)
+                {
+                    matchupEntry[0].TeamCompeting = matchup.Winner;
+                    await MatchUpEntryService.Edit(matchupEntry[0]);
+                }
+
+                await MatchupService.Edit(matchup);
+
+            }//Non-bye matchup
+            else if (matchup?.MatchupEntries.Count == 2 )
             {
-                matchup.Winner = matchup.MatchupEntries[1].TeamCompeting;
+
+                matchup.MatchupEntries[0].Score = _scoreOfTeamOne;
+                matchup.MatchupEntries[1].Score = _scoreOfTeamTwo;
+
+                if (_scoreOfTeamOne == null || _scoreOfTeamTwo == null)
+                {
+                    isVisible = true;
+                    ErrorMessage = "You must enter a score";
+                }
+
+                else if (_scoreOfTeamOne == _scoreOfTeamTwo)
+                {
+                    isVisible = true;
+                    ErrorMessage = "Scores cannot be equal";
+                }
+                else if (_scoreOfTeamOne > _scoreOfTeamTwo)
+                {
+                    matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+
+                }
+                else
+                {
+                    matchup.Winner = matchup.MatchupEntries[1].TeamCompeting;
+                }
+
+                if (matchupEntry.Count > 0)
+                {
+                    matchupEntry[0].TeamCompeting = matchup.Winner;
+                    await MatchUpEntryService.Edit(matchupEntry[0]);
+                }
+
             }
 
-            if (matchupEntry.Count > 0)
-            {
-                matchupEntry[0].TeamCompeting = matchup.Winner;
-                await MatchUpEntryService.Edit(matchupEntry[0]);
-            }
+            //If there isn't a matchupEntry that means it's the last round
+            await MatchupService.Edit(matchup);
+
+            _matchUpList.Remove(_currentMatchup);
         }
-
-        //If there isn't a matchupEntry that means it's the last round
-        await MatchupService.Edit(matchup);
-
-
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
     }
 
     private void RoundChange(ChangeEventArgs e)
@@ -241,102 +274,125 @@
 
     private List<MatchupVM> CreateMatchUpList(int selectedRound)
     {
-        List<MatchupVM> result = new();
-        string s = string.Empty;
-        MatchupVM matchupVM;
 
-        if (selectedRound == 0) return result;
+        isVisible = false;
+        ErrorMessage = string.Empty;
+        var matches = new List<MatchupVM>();
 
-        var matchupsInSelectedRound = _tournamentVM?.Matchups.Where(x => x.MatchupRound == selectedRound);
-
-        if (matchupsInSelectedRound == null) return result;
-
-        @foreach (var matchup in matchupsInSelectedRound)
+        try
         {
+            List<MatchupVM> result = new();
+            string s = string.Empty;
+            MatchupVM matchupVM;
 
-            matchupVM = new(matchup);
+            if (selectedRound == 0) return result;
 
-            @foreach (var matchupEntry in matchup.MatchupEntries)
+            var matchupsInSelectedRound = _tournamentVM?.Matchups.Where(x => x.MatchupRound == selectedRound);
+
+            if (matchupsInSelectedRound == null) return result;
+
+            @foreach (var matchup in matchupsInSelectedRound)
             {
-                //if (matchupEntry.TeamCompeting == null) break;
 
-                MatchupEntryVM vm = new MatchupEntryVM(matchupEntry);
-                
-                if (matchup.MatchupEntries.Count < 2)
-                {
-                    s = $"{matchupEntry.TeamCompeting.TeamName} VS. Bye";
-                }
-                else
-                {
-                    if (matchupEntry.TeamCompeting == null)
-                    {
-                        if (s.Length == 0)
-                        {
-                            s = "TBD" + s;
-                        }
-                        else
-                        {
-                            s = s + " VS. TBD";
-                        }
-                    }
+                matchupVM = new(matchup);
 
-                    else if (s.Length != 0)
+                @foreach (var matchupEntry in matchup.MatchupEntries)
+                {
+                    //if (matchupEntry.TeamCompeting == null) break;
+
+                    MatchupEntryVM vm = new MatchupEntryVM(matchupEntry);
+
+                    if (matchup.MatchupEntries.Count < 2)
                     {
-                        s = $"{s} VS. {matchupEntry.TeamCompeting.TeamName}";
+                        s = $"{matchupEntry.TeamCompeting.TeamName} VS. Bye";
                     }
                     else
                     {
-                        s = $"{s} {matchupEntry.TeamCompeting.TeamName}";
+                        if (matchupEntry.TeamCompeting == null)
+                        {
+                            if (s.Length == 0)
+                            {
+                                s = "TBD" + s;
+                            }
+                            else
+                            {
+                                s = s + " VS. TBD";
+                            }
+                        }
+
+                        else if (s.Length != 0)
+                        {
+                            s = $"{s} VS. {matchupEntry.TeamCompeting.TeamName}";
+                        }
+                        else
+                        {
+                            s = $"{s} {matchupEntry.TeamCompeting.TeamName}";
+                        }
                     }
+
+                    matchupVM.MatchupEntries.Add(vm);
                 }
 
-                matchupVM.MatchupEntries.Add(vm);
+
+                matchupVM.DisplayName = s;
+                s = string.Empty;
+                result.Add(matchupVM);
+
             }
 
-
-            matchupVM.DisplayName = s;
-            s = string.Empty;
-            result.Add(matchupVM);
-
+            if (isChecked)
+            {
+                matches = result.FindAll(x => x.WinnerId == null).ToList();
+            }
+            else
+            {
+                matches = result.FindAll(x => x.WinnerId != null).ToList();
+            }
         }
-
-        if (isChecked)
+        catch (Exception ex)
         {
-            var unPlayedMatches = result.FindAll(x => x.WinnerId == null).ToList();
-            return unPlayedMatches;
-        }
-        else
-        {
-            var playedMatches = result.FindAll(x => x.WinnerId != null).ToList();
-            return playedMatches;
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
+        return matches;
 
     }
 
     private void UpdateTeams(MatchupVM match)
     {
-        _currentMatchup = match;
-        _scoreOfTeamOne = null;
-        _scoreOfTeamTwo = null;
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries.All(matchup => matchup.TeamCompeting == null))
+        try
         {
-            _teamOne = "TBD";
-            _teamTwo = "TBD";
+            _currentMatchup = match;
+            _scoreOfTeamOne = null;
+            _scoreOfTeamTwo = null;
+
+            if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries.All(matchup => matchup.TeamCompeting == null))
+            {
+                _teamOne = "TBD";
+                _teamTwo = "TBD";
+            }
+            else if (_currentMatchup.MatchupEntries.Count == 1)
+            {
+                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName;
+                _teamTwo = "Bye";
+                _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
+            }
+            else
+            {
+                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting != null ? _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName : null;
+                _teamTwo = _currentMatchup.MatchupEntries[1].TeamCompeting != null ? _currentMatchup.MatchupEntries[1].TeamCompeting.TeamName : "TBD";
+                _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
+                _scoreOfTeamTwo = _currentMatchup.MatchupEntries[1].Score;
+            }
         }
-        else if (_currentMatchup.MatchupEntries.Count == 1)
+        catch (Exception ex)
         {
-            _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName;
-            _teamTwo = "Bye";
-            _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
-        }
-        else
-        {
-            _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting != null ? _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName : null;
-            _teamTwo = _currentMatchup.MatchupEntries[1].TeamCompeting != null ? _currentMatchup.MatchupEntries[1].TeamCompeting.TeamName : "TBD";
-            _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
-            _scoreOfTeamTwo = _currentMatchup.MatchupEntries[1].Score;
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
     }
 }

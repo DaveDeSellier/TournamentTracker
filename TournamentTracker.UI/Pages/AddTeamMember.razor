@@ -1,6 +1,9 @@
-﻿@inject IPerson PersonService
+﻿<PageTitle>Add Team Member</PageTitle>
 
-<PageTitle>Add Team Member</PageTitle>
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
 
 <div style="border: 1px solid black;" class="p-2 mt-5 w-100">
     <h1>Add Team Member</h1>
@@ -24,6 +27,9 @@
     </EditForm>
 </div>
 
+@inherits AbstractComponent
+@inject IPerson PersonService
+
 @code {
     TeamVM _teamVM = new();
     PersonVM _personVM = new();
@@ -32,9 +38,15 @@
     [Parameter]
     public EventCallback<PersonVM> OnClickCallback { get; set; }
 
+    protected override void OnInitialized()
+    {
+        isVisible = false;
+        ErrorMessage = "";
+    }
 
     private async Task HandleTeamMemberSubmit()
     {
+
         try
         {
 
@@ -47,9 +59,11 @@
             _personVM = new();
 
 
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
     }

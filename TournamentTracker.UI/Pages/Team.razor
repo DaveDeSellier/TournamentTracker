@@ -3,6 +3,11 @@
 
 <PageTitle>Create Team</PageTitle>
 
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
+
 <EditForm Model="@_teamVM" OnValidSubmit="@CreateTeam">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
@@ -47,6 +52,8 @@
 
 <AddTeamMember OnClickCallback="@AddToTeamDropDown"/>
 
+@inherits AbstractComponent
+
 @code {
     private TeamVM _teamVM = new();
 
@@ -64,14 +71,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var teamMembers = await PersonService.List();
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        foreach (var person in teamMembers)
+        try
         {
-            _teamMembersList.Add(new PersonVM(person));
-        }
+            var teamMembers = await PersonService.List();
 
-     }
+            foreach (var person in teamMembers)
+            {
+                _teamMembersList.Add(new PersonVM(person));
+            }
+
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+    }
 
 
     private void AddToTeamDropDown(PersonVM person)
@@ -129,7 +147,8 @@
         }
         catch (Exception ex)
         {
-           
+            isVisible = true;
+            ErrorMessage = ex.Message;
 
         }
 
