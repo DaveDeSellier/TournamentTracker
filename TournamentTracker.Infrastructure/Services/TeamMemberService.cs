@@ -1,6 +1,5 @@
 ﻿using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
-using TournamentTracker.Infrastructure.Data;
 
 namespace TournamentTracker.Infrastructure.Services
 {
