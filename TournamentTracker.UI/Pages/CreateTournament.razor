@@ -1,12 +1,12 @@
 ﻿@page "/createtournament"
-@inject ITeam TeamService
-@inject ITournament TournamentService
-@inject TournamentLogic TournamentLogic
-@inject IMatchup MatchupService
-@inject IMatchupEntry MatchupEntryService
-@inject IPrize PrizeService
 
 <PageTitle>Tournament</PageTitle>
+
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
+
 
 <h3>Create Tournament</h3>
 
@@ -123,6 +123,13 @@
 
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject ITeam TeamService
+@inject ITournament TournamentService
+@inject TournamentLogic TournamentLogic
+@inject IMatchup MatchupService
+@inject IMatchupEntry MatchupEntryService
+@inject IPrize PrizeService
+@inherits AbstractComponent
 
 @code {
 
@@ -147,18 +154,29 @@
     protected override async Task OnInitializedAsync()
     {
 
-        var teams = await TeamService.GetAllTeams();
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        foreach (var team in teams)
+        try
         {
-            _teamList.Add(new TeamVM(team));
+            var teams = await TeamService.GetAllTeams();
+
+            foreach (var team in teams)
+            {
+                _teamList.Add(new TeamVM(team));
+            }
+
+            var prizes = await PrizeService.List();
+
+            foreach (var prize in prizes)
+            {
+                _prizeList.Add(new PrizeVM(prize));
+            }
         }
-
-        var prizes = await PrizeService.List();
-
-        foreach (var prize in prizes)
+        catch (Exception ex)
         {
-            _prizeList.Add(new PrizeVM(prize));
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
     }
@@ -232,16 +250,41 @@
 
     private async Task OpenModal()
     {
-        await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
     }
 
     private async Task CloseModal()
     {
-        await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
         if (ShowPrizeForm) ShowPrizeForm = !ShowPrizeForm;
 
         if (ShowTeamForm) ShowTeamForm = !ShowTeamForm;
+
+        try
+        {
+            await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+
     }
 
 
@@ -260,14 +303,29 @@
     private async Task Create()
     {
 
-        if (_selectedPrizeList.Count == 0 || _selectedTeamList.Count < 2) return;
+        List<TournamentEntry> entries = new();
+        List<TournamentPrize> prizes = new();
+        List<TournamentTracker.Core.Models.Team> teams = new();
+
+
+        if(_selectedTeamList.Count < 2)
+        {
+            isVisible = true;
+            ErrorMessage = "You must enter at least two teams";
+            return;
+        }
+
+        if (_selectedPrizeList.Count == 0)
+        {
+            isVisible = true;
+            ErrorMessage = "You must select a prize";
+            return;
+        }
+
 
         //Create Tournament model
         try
         {
-            List<TournamentEntry> entries = new();
-            List<TournamentPrize> prizes = new();
-            List<TournamentTracker.Core.Models.Team> teams = new();
 
             foreach (var team in _selectedTeamList)
             {
@@ -368,11 +426,11 @@
             _selectedTeamList.Clear();
 
             Navigation.NavigateTo("/");
-
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
     }
 

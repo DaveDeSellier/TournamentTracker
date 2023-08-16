@@ -130,15 +130,14 @@
 
         try
         {
-
             //Create a team record in the database
             var team = new TeamVM(_teamVM.TeamName, _selectedTeamMembersList);
 
-            await TeamService.Add(team.Team);
+            var teamRecord = await TeamService.AddTeamAsync(team.Team);
 
             _selectedTeamMembersList.Clear();
 
-            await OnClickCallBack.InvokeAsync(_teamVM);
+            await OnClickCallBack.InvokeAsync(new TeamVM(teamRecord));
 
             _teamVM = new();
 

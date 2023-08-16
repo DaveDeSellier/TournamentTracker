@@ -12,12 +12,23 @@ namespace TournamentTracker.Infrastructure.Services
             _context = context;
         }
 
-        public Task<List<Team>> GetAllTeams()
+        public async Task<List<Team>> GetAllTeams()
         {
-            return _context.Teams
+            return await _context.Teams
                     .Include(teams => teams.TeamMembers)
                     .ThenInclude(teamMembers => teamMembers.Person)
                     .ToListAsync();
+        }
+
+        public async Task<Team> AddTeamAsync(Team team)
+        {
+
+            await _context.AddAsync(team);
+
+            await _context.SaveChangesAsync();
+
+            return team;
+
         }
 
 
