@@ -31,20 +31,20 @@
                         <div class="flex-fill mt-4">
                             <label>Select a Team</label>
                             <div class="d-flex flex-column gap-2">
-                                <InputSelect class="form-select w-25" @bind-Value="_selectedTeam">
+                                <InputSelect id="TeamList" class="form-select w-25" @bind-Value="_selectedTeam">
                                         <option disabled selected value> -- select an option -- </option>
                                         @foreach(var member in _teamList)
                                         {
                                             <option>@member.TeamName</option>
                                         }
                                 </InputSelect>
-                                <button @onclick="AddTeamToList" class="btn btn-primary w-25" type="button">Add Team</button>
+                                <button id="btnAddTeamToList" @onclick="AddTeamToList" class="btn btn-primary w-25" type="button">Add Team</button>
                             </div>
                         </div>
                         <div class="flex-fill mt-4">
                             <label>Select a Prize</label>
                             <div class="d-flex flex-column gap-2">
-                                <InputSelect class="form-select w-25" @bind-Value="_selectedPrize">
+                                <InputSelect id="PrizeList"class="form-select w-25" @bind-Value="_selectedPrize">
                                         <option disabled selected value> -- select an option -- </option>
                                         @foreach(var prize in _prizeList)
                                         {
@@ -64,7 +64,7 @@
             <div style="border:1px solid black;" class="flex-fill">
                 <div>
                     <h2>Teams</h2>
-                    <ul class="list-group">
+                    <ul id="SelectedTeamList" class="list-group">
                         @foreach(var team in _selectedTeamList)
                         {
                            <li class="list-group-item">

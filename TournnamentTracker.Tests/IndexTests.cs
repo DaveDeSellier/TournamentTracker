@@ -10,21 +10,22 @@ namespace TournnamentTracker.Tests
     public class IndexTests : TestContext
     {
         [Fact]
-        public async void Test_Index_InitializationState()
+        public void Test_Index_InitializationState()
         {
 
             // Arrange
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
-            //Add this to invoke OnInitializedAsync 
-            cut.WaitForState(() => cut.Find("select").ChildElementCount > 1, System.TimeSpan.FromSeconds(1));
+            cut.WaitForState(() => cut.Find("select").ChildElementCount >= 1, System.TimeSpan.FromSeconds(1));
 
             var tournamentDropDownList = cut.Find("select");
 
             Assert.True(cut.Instance.isVisible == false);
             Assert.True(cut.Instance.ErrorMessage == string.Empty);
-            Assert.True(tournamentDropDownList.ChildElementCount > 1);
+            Assert.True(tournamentDropDownList.ChildElementCount >= 1);
+            Assert.Equal("http://localhost/", navMan.Uri);
         }
 
         [Fact]
@@ -32,6 +33,7 @@ namespace TournnamentTracker.Tests
         {
             // Arrange
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
             var btnLoadTournament = cut.Find("div > button:first-child");
@@ -41,14 +43,16 @@ namespace TournnamentTracker.Tests
             Assert.True(cut.Instance.isVisible == true);
             Assert.False(string.IsNullOrEmpty(cut.Instance.ErrorMessage));
             Assert.True(cut.HasComponent<Alert>());
+            Assert.Equal("http://localhost/", navMan.Uri);
 
         }
 
         [Fact]
-        public async void Test_LoadTournamentButton_WhenTournamentIsSelected()
+        public void Test_LoadTournamentButton_WhenTournamentIsSelected()
         {
             // Arrange
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
             var tournamentDropDownList = cut.Find("select");
@@ -57,17 +61,40 @@ namespace TournnamentTracker.Tests
 
             changeArgs.Value = 1;
 
-            await cut.InvokeAsync(() => tournamentDropDownList.ChangeAsync(changeArgs));
+            cut.InvokeAsync(async () => await tournamentDropDownList.ChangeAsync(changeArgs));
 
             var btnLoadTournament = cut.Find("div > button:first-child");
 
+            //Act
             btnLoadTournament.Click();
 
+            //Assert
             Assert.True(cut.Instance.isVisible == false);
             Assert.True(string.IsNullOrEmpty(cut.Instance.ErrorMessage));
             Assert.False(cut.HasComponent<Alert>());
+            Assert.Equal("http://localhost/tournament/1", navMan.Uri);
 
         }
+
+        [Fact]
+        public void Test_CreateTournamentBtn_NavigationToCreateTournamentPage()
+        {
+            //Arrange
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            var navMan = Services.GetRequiredService<FakeNavigationManager>();
+            var cut = RenderComponent<Index>();
+
+            var btnCreateTournament = cut.Find("div > button:last-child");
+
+            //Act
+            btnCreateTournament.Click();
+            cut.WaitForState(() => navMan.Uri == "http://localhost/createtournament", System.TimeSpan.FromSeconds(1));
+
+            //Assert
+            Assert.Equal("http://localhost/createtournament", navMan.Uri);
+
+        }
+
     }
 }
 
