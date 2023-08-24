@@ -8,7 +8,7 @@
 }
 
 
-<h3>Create Tournament</h3>
+<h1>Create Tournament</h1>
 
 <div class=min-vh-100>
     <div class="row position-relative">
@@ -56,14 +56,15 @@
                         </div>
                     </div>
                 </div>
-                <button class="mt-5 btn btn-primary" type="submit">Create Tournament</button>
+                <button class="mt-5 btn btn-primary btn-lg" type="submit">Create Tournament</button>
             </EditForm>
         </div>
-           
+        
+       
         <div class="d-flex flex-column col">
+            <h2>Teams</h2>
             <div style="border:1px solid black;" class="flex-fill">
                 <div>
-                    <h2>Teams</h2>
                     <ul id="SelectedTeamList" class="list-group">
                         @foreach(var team in _selectedTeamList)
                         {
@@ -76,9 +77,9 @@
             </div>
             <button @onclick="RemoveSelectedTeam">Delete Selected Team</button>
 
+            <h2>Prizes</h2>
             <div style="border:1px solid black;" class="flex-fill">
                 <div>
-                    <h2>Prizes</h2>
                     <ul class="list-group">
                         @foreach(var prize in _selectedPrizeList)
                         {
@@ -95,17 +96,15 @@
     </div>
 
     <div class="d-flex flex-column w-25 h-100 gap-3 m-auto mt-5">
-        <button class="@BtnPrimary" @onclick="@((e) => HandleShowTeamFormClick(e))">New Team</button>
-        <button class="@BtnPrimary" @onclick="@((e) => HandleShowPrizeFormClick(e))">New Prize</button>
+        <button id="btnNewTeam" class="btn btn-secondary" @onclick="@((e) => HandleShowTeamFormClick(e))">New Team</button>
+        <button id="btnNewPrize" class="btn btn-secondary" @onclick="@((e) => HandleShowPrizeFormClick(e))">New Prize</button>
     </div>
 
     @if (ShowPrizeForm)
     {
 
         <Modal Heading="Create Prize" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
-            <Body>
-                <Prize OnClickCallBack="@AddPrize" OnClose="@CloseModal" />
-            </Body>
+            <Prize OnClickCallBack="@AddPrize" OnClose="@CloseModal" />
         </Modal>
 
     }
@@ -113,11 +112,10 @@
     @if (ShowTeamForm)
     {
         <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
-            <Body>
-                <Team OnClickCallBack="@AddTeam" OnClose="@CloseModal" />
-            </Body>
+            <Team OnClickCallBack="@AddTeam" OnClose="@CloseModal" />
         </Modal>
     }
+
 
 </div>
 

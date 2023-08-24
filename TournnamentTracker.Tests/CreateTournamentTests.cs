@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using AngleSharp;
+using AngleSharp.Html.Parser;
+using Microsoft.AspNetCore.Components;
 using System;
+using System.Linq;
 using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
@@ -63,7 +66,7 @@ namespace TournnamentTracker.Tests
         }
 
         [Fact]
-        public void Test_AddToTeamListButton_WhenATeamIsSelected()
+        public async void Test_AddToTeamListButton_WhenATeamIsSelected()
         {
             // Arrange
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
@@ -77,14 +80,18 @@ namespace TournnamentTracker.Tests
 
             var selectATeamList = cut.Find("#TeamList");
 
+            var context = BrowsingContext.New(Configuration.Default);
+            var document = await context.OpenAsync(r => r.Content(selectATeamList.TextContent));
+            var app = document.QuerySelector("li");
+            var parser = context.GetService<IHtmlParser>();
+            var nodes = parser.ParseFragment("<div id='div1'>hi<p>world</p></div>", app);
+            app.Append(nodes.ToArray());
+
             cut.WaitForState(() => selectATeamList.ChildElementCount > 1, TimeSpan.FromSeconds(1));
 
             var btnAddToTeamList = cut.Find("#btnAddTeamToList");
-
             var selectedTeamList = cut.Find("#SelectedTeamList");
-
             var changeArgs = new ChangeEventArgs();
-
             var lastChild = selectATeamList.LastChild.TextContent;
 
             changeArgs.Value = lastChild;
@@ -94,8 +101,11 @@ namespace TournnamentTracker.Tests
 
             btnAddToTeamList.Click();
 
-            //Assert
             cut.WaitForState(() => selectedTeamList.ChildElementCount > 0, TimeSpan.FromSeconds(1));
+
+            //Assert
+            Assert.True(selectedTeamList.ChildElementCount == 1);
+
 
         }
 
