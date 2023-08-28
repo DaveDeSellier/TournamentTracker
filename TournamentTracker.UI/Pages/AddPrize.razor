@@ -6,20 +6,20 @@
 
 <div class="d-flex">
     <div class="d-flex flex-column w-25 gap-2">
-            <select id="TeamList" class="form-select w-75 mb-2" @bind="_selectedTeam">
-                    <option disabled selected value> -- Select a team -- </option>
-                    @foreach(var member in _teamList)
+            <select id="TeamList" class="form-select w-75 mb-2" @bind="_selectedPrize">
+                    <option disabled selected value> -- Select a prize -- </option>
+                    @foreach(var member in _prizeList)
                     {
-                        <option>@member.TeamName</option>
+                        <option>@member.PlaceName</option>
                     }
             </select>
-            <button id="btnAddTeamToList" @onclick="AddTeamToList" class="btn btn-primary w-75" type="button">Add Team</button>
-            <button id="btnNewTeam" @onclick="isTeamFormVisible" class="btn btn-secondary w-75" type="button">New Team</button>
+            <button id="btnAddPrize" @onclick="AddPrizeToSelectedList" class="btn btn-primary w-75" type="button">Add Prize</button>
+            <button id="btnNewPrize" @onclick="isPrizeFormVisible" class="btn btn-secondary w-75" type="button">New Prize</button>
 
-            @if (ShowTeamForm)
+            @if (ShowPrizeForm)
             {
-                <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
-                    <Prize OnClickCallBack="@AddNewTeam" OnClose="@CloseModal" />
+                <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
+                    <CreatePrize OnClickCallBack="@AddPrizeToDropDown" OnClose="@CloseModal" />
                 </Modal>
             }
     </div>
@@ -30,31 +30,146 @@
             <div style="min-height: 30rem; border:1px solid black;" class="flex-fill">
                 <div>
                     <ul id="SelectedTeamList" class="m-0 p-0">
-                        @foreach (var team in _selectedTeamList)
+                        @foreach (var prize in _selectedPrizeList)
                         {
-                            <li key="@team.Id" class="d-flex gap-2 p-2">
-                                <button @onclick="@(() => RemoveSelectedTeam(team.Id))" aria-label="Close" type="button" class="btn-close"></button>
-                                    @team.TeamName
+                            <li key="@prize.Id" class="d-flex gap-2 p-2">
+                                <button @onclick="@(() => RemoveSelectedPrize(prize.Id))" aria-label="Close" type="button" class="btn-close"></button>
+                                    @prize.PlaceName
                                 </li>
                             }
                         </ul>
                 </div>
             </div>
-            <button @onclick="ToPrizePage" class="btn btn-outline-primary p-2">Next</button>
+            <button @onclick="ToCheckOut" class="btn btn-outline-primary p-2">Next</button>
         </div>
 
     }
 
 </div>
 
+@inherits AbstractComponent
 @inject TournamentVM TournamentState
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IPrize PrizeService
 
 @code {
+    private bool ShowPrizeForm = false;
     private bool ShowSelectedPrizeList = false;
+    private string? _selectedPrize;
     private List<PrizeVM> _selectedPrizeList = new();
+    private List<PrizeVM> _prizeList = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+
+            var prizes = await PrizeService.List();
+
+            foreach (var prize in prizes)
+            {
+                _prizeList.Add(new PrizeVM(prize));
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+
+    }
+
+    private void AddPrizeToSelectedList() 
+    { 
+        if (_selectedPrize == null) return;
+
+        var prize = _prizeList.Find(x => x.PlaceName == _selectedPrize);
+
+        if (prize == null) return;
+
+        if (_selectedPrizeList.Contains(prize)) return;
+
+        _selectedPrizeList.Add(prize);
+
+        ShowSelectedPrizeList = true;
+
+    }
+
+    private void AddPrizeToDropDown(PrizeVM prize)
+    {
+        _prizeList.Add(prize);
+        _selectedPrizeList.Add(prize);
+    }
+
+    private void isPrizeFormVisible()
+    {
+
+        ShowPrizeForm = true;
+    }
+
+    private void RemoveSelectedPrize(int id)
+    {
+
+        var team = _selectedPrizeList.Find(x => x.Id == id);
+
+        if (team == null) return;
+
+        _selectedPrizeList.Remove(team);
+
+        ShowSelectedPrizeList = _selectedPrizeList.Count > 0;
+
+    }
 
 
 
-    
+    public void ToCheckOut()
+    {
+        
+
+    }
+
+    private async Task OpenModal()
+    {
+
+    isVisible = false;
+    ErrorMessage = string.Empty;
+
+        try
+        {
+            await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task CloseModal()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        if (ShowPrizeForm) ShowPrizeForm = !ShowPrizeForm;
+
+        try
+        {
+            await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+
+    }
+
 
 }

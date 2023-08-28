@@ -8,7 +8,7 @@
     <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
 }
 
-<EditForm Model="@_teamVM" OnValidSubmit="@CreateTeam">
+<EditForm Model="@_teamVM" OnValidSubmit="@CreateTeamRecord">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div class="position-relative">
@@ -123,7 +123,7 @@
         _selectedTeamMembersList.Remove(member);
     }
 
-    private async Task CreateTeam()
+    private async Task CreateTeamRecord()
     {
 
         if (_selectedTeamMembersList.Count == 0) return;

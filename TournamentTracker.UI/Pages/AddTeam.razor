@@ -21,7 +21,7 @@
             @if (ShowTeamForm)
             {
                 <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
-                    <Team OnClickCallBack="@AddNewTeam" OnClose="@CloseModal" />
+                    <CreateTeam OnClickCallBack="@AddNewTeam" OnClose="@CloseModal" />
                 </Modal>
             }
     </div>
@@ -128,8 +128,7 @@
         _teamList.Add(team);
     }
 
-
-    private async Task OpenModal()
+    public virtual async Task OpenModal()
     {
 
         isVisible = false;
@@ -146,13 +145,13 @@
         }
     }
 
-    private async Task CloseModal()
+    public virtual async Task CloseModal()
     {
 
         isVisible = false;
         ErrorMessage = string.Empty;
 
-        if (ShowTeamForm) ShowTeamForm = !ShowTeamForm;
+        ShowTeamForm = !ShowTeamForm;
 
         try
         {
