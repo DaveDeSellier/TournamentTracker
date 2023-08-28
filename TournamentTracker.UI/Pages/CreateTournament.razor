@@ -135,8 +135,6 @@
     private string? _selectedPrize;
     private bool ShowPrizeForm = false;
     private bool ShowTeamForm = false;
-    private string BtnDanger = "btn btn-danger";
-    private string BtnPrimary = "btn btn-primary";
 
     private TournamentVM _tournamentVM = new();
 
@@ -190,7 +188,6 @@
         if (_selectedTeamList.Contains(team)) return;
 
         _selectedTeamList.Add(team);
-
 
     }
 

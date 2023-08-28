@@ -3,6 +3,7 @@ using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
 using TournamentTracker.Infrastructure.Services;
+using TournamentTracker.UI.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IMatchup, MatchupService>();
 builder.Services.AddScoped<ITournament, TournamentService>();
 builder.Services.AddScoped<IMatchupEntry, MatchupEntryService>();
 builder.Services.AddScoped<TournamentLogic>();
+builder.Services.AddScoped<TournamentVM>();
 
 var app = builder.Build();
 

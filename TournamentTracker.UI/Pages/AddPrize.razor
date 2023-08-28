@@ -1,0 +1,60 @@
+﻿@page "/createtournament2/addprize"
+
+<h1>Select a Prize</h1>
+
+<p class="bg-info p-2">Tournament: @TournamentState?.TournamentName</p>
+
+<div class="d-flex">
+    <div class="d-flex flex-column w-25 gap-2">
+            <select id="TeamList" class="form-select w-75 mb-2" @bind="_selectedTeam">
+                    <option disabled selected value> -- Select a team -- </option>
+                    @foreach(var member in _teamList)
+                    {
+                        <option>@member.TeamName</option>
+                    }
+            </select>
+            <button id="btnAddTeamToList" @onclick="AddTeamToList" class="btn btn-primary w-75" type="button">Add Team</button>
+            <button id="btnNewTeam" @onclick="isTeamFormVisible" class="btn btn-secondary w-75" type="button">New Team</button>
+
+            @if (ShowTeamForm)
+            {
+                <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
+                    <Prize OnClickCallBack="@AddNewTeam" OnClose="@CloseModal" />
+                </Modal>
+            }
+    </div>
+
+    @if (ShowSelectedPrizeList)
+    {
+        <div class="d-flex flex-column flex-fill">
+            <div style="min-height: 30rem; border:1px solid black;" class="flex-fill">
+                <div>
+                    <ul id="SelectedTeamList" class="m-0 p-0">
+                        @foreach (var team in _selectedTeamList)
+                        {
+                            <li key="@team.Id" class="d-flex gap-2 p-2">
+                                <button @onclick="@(() => RemoveSelectedTeam(team.Id))" aria-label="Close" type="button" class="btn-close"></button>
+                                    @team.TeamName
+                                </li>
+                            }
+                        </ul>
+                </div>
+            </div>
+            <button @onclick="ToPrizePage" class="btn btn-outline-primary p-2">Next</button>
+        </div>
+
+    }
+
+</div>
+
+@inject TournamentVM TournamentState
+
+@code {
+    private bool ShowSelectedPrizeList = false;
+    private List<PrizeVM> _selectedPrizeList = new();
+
+
+
+    
+
+}

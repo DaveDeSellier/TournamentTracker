@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TournamentTracker.Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TournamentTracker.UI", "TournamentTracker.UI\TournamentTracker.UI.csproj", "{301E5DB1-DC17-4530-9D64-BCFDF1982500}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournnamentTracker.Tests", "TournnamentTracker.Tests\TournnamentTracker.Tests.csproj", "{41BEE4C2-6D0E-4004-9BEA-3D724DDD6B41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TournnamentTracker.Tests", "TournnamentTracker.Tests\TournnamentTracker.Tests.csproj", "{41BEE4C2-6D0E-4004-9BEA-3D724DDD6B41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

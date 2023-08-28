@@ -1,0 +1,13 @@
+﻿@if (isLoading)
+{
+    <div class="spinner-border" role="status">
+    </div>
+}
+
+
+@code {
+
+    [Parameter]
+    public bool isLoading { get; set; } = false;
+
+}

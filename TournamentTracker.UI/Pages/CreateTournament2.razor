@@ -1,0 +1,35 @@
+﻿@page "/createtournament2"
+
+<h1>Create Tournament</h1>
+
+<EditForm Model="@TournamentState" OnValidSubmit="Next">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div>
+        <div class="form-group w-25">
+            <label>Tournament Name </label>
+            <InputText id="" class="form-control" @bind-Value=TournamentState.TournamentName/>
+        </div>
+
+        <div class="mt-4 form-group-item w-25">
+            <label>Entry Fee</label>
+            <InputText id="" class="form-control" @bind-Value=TournamentState.EntryFee/>
+        </div>
+    </div>
+    <button class="mt-4 btn btn-primary" type="submit">Next</button>
+</EditForm>
+
+@inject NavigationManager Navigation
+
+@inject TournamentVM TournamentState
+
+@code {
+
+    private void Next()
+    {
+
+        Navigation.NavigateTo("/createtournament2/addteam");
+
+    }
+
+}
