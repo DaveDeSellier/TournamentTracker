@@ -1,5 +1,6 @@
-﻿@page "/createtournament2/addprize"
+﻿@page "/createtournament/addprize"
 
+<Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage></Alert>
 <h1>Select a Prize</h1>
 
 <p class="bg-info p-2">Tournament: @TournamentState?.TournamentName</p>
@@ -54,6 +55,7 @@
 @inject IPrize PrizeService
 
 @code {
+
     private bool ShowPrizeForm = false;
     private bool ShowSelectedPrizeList = false;
     private string? _selectedPrize;
@@ -127,10 +129,41 @@
     }
 
 
-
     public void ToCheckOut()
     {
-        
+        List<TournamentPrize> prizes = new();
+
+        if (_selectedPrizeList.Count == 0)
+        {
+            isVisible = true;
+            ErrorMessage = "You must select a prize";
+            return;
+        }
+
+        try
+        {
+
+            foreach (var prize in _selectedPrizeList)
+            {
+
+                var tournamentPrize = new TournamentPrize()
+                {
+                        PrizeId = prize.Id,
+                        Prize = PrizeVM.CreatePrize(prize)
+                    };
+
+                prizes.Add(tournamentPrize);
+
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        TournamentState.TournamentPrizes = prizes;
+
+        Navigation.NavigateTo("/createtournament/checkout");
 
     }
 

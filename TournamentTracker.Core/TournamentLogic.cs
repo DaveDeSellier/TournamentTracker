@@ -12,9 +12,18 @@ namespace TournamentTracker.Core
         //Create every round after that - (16 teams) 8 matchup -  (8 teams) 4 matchups - (4 teams) 2 matchups - (2teams) 1 matchup
 
 
-        public List<List<Matchup>> CreateRounds(Tournament vm, List<Team> teams)
+        public List<List<Matchup>> CreateRounds(Tournament vm)
         {
             List<List<Matchup>> rounds = new();
+
+            List<Team> teams = new();
+
+            foreach (var entry in vm.TournamentEntries)
+            {
+
+                teams.Add(entry.Team);
+
+            }
 
             var randomizedTeams = RandomizeTeamOrder(teams);
             int roundNumber = FindNumberOfRounds(randomizedTeams.Count);
@@ -122,6 +131,23 @@ namespace TournamentTracker.Core
         {
 
             return teams.OrderBy(t => Guid.NewGuid()).ToList();
+
+        }
+
+        public static Tournament CreateTournament(TournamentVM vm)
+        {
+
+            Tournament tournament = new Tournament()
+            {
+
+                TournamentName = vm.TournamentName,
+                TournamentEntries = vm.TournamentEntries,
+                TournamentPrizes = vm.TournamentPrizes,
+                Matchups = vm.Matchups
+
+            };
+
+            return tournament;
 
         }
 

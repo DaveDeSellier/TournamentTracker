@@ -59,5 +59,18 @@ namespace TournamentTracker.UI.ViewModels
             return result;
         }
 
+        public static Team CreateTeam(TeamVM vm)
+        {
+
+            Team team = new Team()
+            {
+                Id = vm.Id,
+                TeamName = vm.TeamName,
+                TeamMembers = vm.TeamMembers
+
+            };
+
+            return team;
+        }
     }
 }

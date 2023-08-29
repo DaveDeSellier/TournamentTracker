@@ -46,7 +46,7 @@ namespace TournamentTracker.Infrastructure
 
         public virtual async Task<List<T>> List()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _context.Set<T>().AsNoTracking().ToListAsync();
         }
 
         public virtual async Task<List<T>?> List(Expression<Func<T, bool>> predicate)

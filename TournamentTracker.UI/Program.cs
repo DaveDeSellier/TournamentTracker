@@ -10,18 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<TournamentTrackerContext>().AddDbContext<TournamentTrackerContext>(options =>
-options.UseSqlServer("Data Source = DESKTOP - 6QE2B0K; Initial Catalog = TournamentTracker; Integrated Security = True; TrustServerCertificate = True;"), ServiceLifetime.Scoped);
-
+builder.Services.AddDbContext<TournamentTrackerContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConn")));
 //builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IPrize, PrizeService>();
-builder.Services.AddScoped<IPerson, PersonService>();
-builder.Services.AddScoped<ITeam, TeamService>();
-builder.Services.AddScoped<ITeamMember, TeamMemberService>();
-builder.Services.AddScoped<IMatchup, MatchupService>();
-builder.Services.AddScoped<ITournament, TournamentService>();
-builder.Services.AddScoped<IMatchupEntry, MatchupEntryService>();
-builder.Services.AddScoped<TournamentLogic>();
+builder.Services.AddTransient<IPrize, PrizeService>();
+builder.Services.AddTransient<IPerson, PersonService>();
+builder.Services.AddTransient<ITeam, TeamService>();
+builder.Services.AddTransient<ITeamMember, TeamMemberService>();
+builder.Services.AddTransient<IMatchup, MatchupService>();
+builder.Services.AddTransient<ITournament, TournamentService>();
+builder.Services.AddTransient<IMatchupEntry, MatchupEntryService>();
+builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();
 
 var app = builder.Build();

@@ -1,433 +1,45 @@
 ﻿@page "/createtournament"
 
-<PageTitle>Tournament</PageTitle>
-
-@if (isVisible)
-{
-    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
-}
-
+<Alert IsVisible="@isVisible" ErrorMessage="@ErrorMessage"></Alert>
 
 <h1>Create Tournament</h1>
 
-<div class=min-vh-100>
-    <div class="row position-relative">
-        <div class="col h-100">
-            <EditForm Model="@_tournamentVM" OnValidSubmit="Create">
-                <DataAnnotationsValidator/>
-                <ValidationSummary/>
-                <div>
-                    <div class="form-group w-25">
-                        <label>Tournament Name </label>
-                        <InputText id="" class="form-control" @bind-Value=_tournamentVM.TournamentName/>
-                    </div>
-
-                    <div class="mt-4 form-group-item w-25">
-                        <label>Entry Fee</label>
-                        <InputText id="" class="form-control" @bind-Value=_tournamentVM.EntryFee/>
-                    </div>
-                    
-                    <div>
-                        <div class="flex-fill mt-4">
-                            <label>Select a Team</label>
-                            <div class="d-flex flex-column gap-2">
-                                <InputSelect id="TeamList" class="form-select w-25" @bind-Value="_selectedTeam">
-                                        <option disabled selected value> -- select an option -- </option>
-                                        @foreach(var member in _teamList)
-                                        {
-                                            <option>@member.TeamName</option>
-                                        }
-                                </InputSelect>
-                                <button id="btnAddTeamToList" @onclick="AddTeamToList" class="btn btn-primary w-25" type="button">Add Team</button>
-                            </div>
-                        </div>
-                        <div class="flex-fill mt-4">
-                            <label>Select a Prize</label>
-                            <div class="d-flex flex-column gap-2">
-                                <InputSelect id="PrizeList"class="form-select w-25" @bind-Value="_selectedPrize">
-                                        <option disabled selected value> -- select an option -- </option>
-                                        @foreach(var prize in _prizeList)
-                                        {
-                                            <option>@prize.PlaceName</option>
-                                        }
-                                </InputSelect>
-                                <button @onclick="AddPrizeToList" class="btn btn-primary w-25" type="button">Add Prize</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="mt-5 btn btn-primary btn-lg" type="submit">Create Tournament</button>
-            </EditForm>
+<EditForm Model="@TournamentState" OnValidSubmit="Next">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div>
+        <div class="form-group w-25">
+            <label>Tournament Name </label>
+            <InputText id="" class="form-control" @bind-Value=TournamentState.TournamentName/>
         </div>
-        
-       
-        <div class="d-flex flex-column col">
-            <h2>Teams</h2>
-            <div style="border:1px solid black;" class="flex-fill">
-                <div>
-                    <ul id="SelectedTeamList" class="list-group">
-                        @foreach(var team in _selectedTeamList)
-                        {
-                           <li class="list-group-item">
-                               <button class="list-group-item list-group-item-action" @onclick="@((e) => _selectedTeam = team.TeamName)">@team.TeamName</button>
-                           </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-            <button @onclick="RemoveSelectedTeam">Delete Selected Team</button>
 
-            <h2>Prizes</h2>
-            <div style="border:1px solid black;" class="flex-fill">
-                <div>
-                    <ul class="list-group">
-                        @foreach(var prize in _selectedPrizeList)
-                        {
-                            <li class="list-group-item">
-                               <button class="list-group-item list-group-item-action" @onclick="@((e) => _selectedPrize = prize.PlaceName)">@prize.PlaceName</button>
-                           </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-            <button @onclick="RemoveSelectedPrize">Delete Selected Prize</button>
-         </div>
-
+        <div class="mt-4 form-group-item w-25">
+            <label>Entry Fee</label>
+            <InputText id="" class="form-control" @bind-Value=TournamentState.EntryFee/>
+        </div>
     </div>
+    <button class="mt-4 btn btn-primary" type="submit">Next</button>
+</EditForm>
 
-    <div class="d-flex flex-column w-25 h-100 gap-3 m-auto mt-5">
-        <button id="btnNewTeam" class="btn btn-secondary" @onclick="@((e) => HandleShowTeamFormClick(e))">New Team</button>
-        <button id="btnNewPrize" class="btn btn-secondary" @onclick="@((e) => HandleShowPrizeFormClick(e))">New Prize</button>
-    </div>
-
-    @if (ShowPrizeForm)
-    {
-
-        <Modal Heading="Create Prize" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
-            <Prize OnClickCallBack="@AddPrize" OnClose="@CloseModal" />
-        </Modal>
-
-    }
-
-    @if (ShowTeamForm)
-    {
-        <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
-            <Team OnClickCallBack="@AddTeam" OnClose="@CloseModal" />
-        </Modal>
-    }
-
-
-</div>
-
-@inject IJSRuntime JS
 @inject NavigationManager Navigation
-@inject ITeam TeamService
-@inject ITournament TournamentService
-@inject TournamentLogic TournamentLogic
-@inject IMatchup MatchupService
-@inject IMatchupEntry MatchupEntryService
-@inject IPrize PrizeService
+@inject TournamentVM TournamentState
 @inherits AbstractComponent
 
 @code {
 
-    private string? _selectedTeam;
-    private string? _selectedPrize;
-    private bool ShowPrizeForm = false;
-    private bool ShowTeamForm = false;
-
-    private TournamentVM _tournamentVM = new();
-
-    private List<TeamVM> _teamList = new();
-
-    private List<TeamVM> _selectedTeamList = new();
-
-    private List<PrizeVM> _prizeList = new();
-
-    private List<PrizeVM> _selectedPrizeList = new();
-
-
-    protected override async Task OnInitializedAsync()
+    private void Next()
     {
-
-        isVisible = false;
-        ErrorMessage = string.Empty;
 
         try
         {
-            var teams = await TeamService.GetAllTeams();
-
-            foreach (var team in teams)
-            {
-                _teamList.Add(new TeamVM(team));
-            }
-
-            var prizes = await PrizeService.List();
-
-            foreach (var prize in prizes)
-            {
-                _prizeList.Add(new PrizeVM(prize));
-            }
+            Navigation.NavigateTo("/createtournament/addteam");
         }
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Failed to create tournament";
         }
 
     }
 
-    private void AddTeamToList()
-    {
-        if (_selectedTeam == null) return;
-
-        var team = _teamList.Find(x => x.TeamName == _selectedTeam);
-
-        if (team == null) return;
-
-        if (_selectedTeamList.Contains(team)) return;
-
-        _selectedTeamList.Add(team);
-
-    }
-
-    private void AddPrizeToList() 
-    { 
-        if (_selectedPrize == null) return;
-
-        var prize = _prizeList.Find(x => x.PlaceName == _selectedPrize);
-
-        if (prize == null) return;
-
-        if (_selectedPrizeList.Contains(prize)) return;
-
-        _selectedPrizeList.Add(prize);
-
-    }
-
-    private void HandleShowTeamFormClick(MouseEventArgs e)
-    {
-        ShowTeamForm = true;
-        ShowPrizeForm = false;
-    }
-
-
-    private void HandleShowPrizeFormClick(MouseEventArgs e)
-    {
-        ShowPrizeForm = true;
-        ShowTeamForm = false;
-    }
-
-
-    private void AddTeam(TeamVM team)
-    {
-        _teamList.Add(team);
-    }
-
-
-    private void AddPrize(PrizeVM prize)
-    {
-        _prizeList.Add(prize);
-        _selectedPrizeList.Add(prize);
-    }
-
-    private void RemoveSelectedTeam()
-    {
-        if (_selectedTeam == null) return;
-
-        var team = _selectedTeamList.Find(x => x.TeamName == _selectedTeam);
-
-        if (team == null) return;
-
-        _selectedTeamList.Remove(team);
-
-    }
-
-    private async Task OpenModal()
-    {
-
-        isVisible = false;
-        ErrorMessage = string.Empty;
-
-        try
-        {
-            await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
-    }
-
-    private async Task CloseModal()
-    {
-
-        isVisible = false;
-        ErrorMessage = string.Empty;
-
-        if (ShowPrizeForm) ShowPrizeForm = !ShowPrizeForm;
-
-        if (ShowTeamForm) ShowTeamForm = !ShowTeamForm;
-
-        try
-        {
-            await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
-
-    }
-
-
-    private void RemoveSelectedPrize()
-    {
-        if (_selectedPrize == null) return;
-
-        var prize = _selectedPrizeList.Find(x => x.PlaceName == _selectedPrize);
-
-        if (prize == null) return;
-
-        _selectedPrizeList.Remove(prize);
-
-    }
-
-    private async Task Create()
-    {
-
-        List<TournamentEntry> entries = new();
-        List<TournamentPrize> prizes = new();
-        List<TournamentTracker.Core.Models.Team> teams = new();
-
-
-        if(_selectedTeamList.Count < 2)
-        {
-            isVisible = true;
-            ErrorMessage = "You must enter at least two teams";
-            return;
-        }
-
-        if (_selectedPrizeList.Count == 0)
-        {
-            isVisible = true;
-            ErrorMessage = "You must select a prize";
-            return;
-        }
-
-
-        //Create Tournament model
-        try
-        {
-
-            foreach (var team in _selectedTeamList)
-            {
-
-                var entry = new TournamentEntry()
-                    {
-                        TeamId = team.Id
-                    };
-
-                entries.Add(entry);
-
-                var entity = await TeamService.GetById(team.Id);
-
-                if (entity != null)
-                {
-                    teams.Add(entity);
-                }
-            }
-
-            foreach (var prize in _selectedPrizeList)
-            {
-
-
-                var tournamentPrize = new TournamentPrize()
-                    {
-                        PrizeId = prize.Id
-                    };
-
-                prizes.Add(tournamentPrize);
-
-            }
-
-            _tournamentVM.TournamentPrizes = prizes;
-            _tournamentVM.TournamentEntries = entries;
-            _tournamentVM.EnteredTeams = teams;
-
-
-
-            //Create Tournament Entity
-            var tourn = new TournamentTracker.Core.Models.Tournament()
-                {
-                    TournamentName = _tournamentVM.TournamentName,
-                    EntryFee = Decimal.Parse(_tournamentVM.EntryFee)
-                };
-
-
-
-            //Add Teams
-            foreach (var entry in _tournamentVM.TournamentEntries)
-            {
-                tourn.TournamentEntries.Add(entry);
-            }
-
-
-            //Add Prizes
-            foreach (var prize in _tournamentVM.TournamentPrizes)
-            {
-
-                tourn.TournamentPrizes.Add(prize);
-            }
-
-
-            //Save Tournament to database
-            await TournamentService.Add(tourn);
-
-            // Create Rounds
-            List<List<Matchup>> rounds = TournamentLogic.CreateRounds(tourn, teams);
-
-            //Add Rounds
-
-            foreach (List<Matchup> round in rounds)
-            {
-
-                foreach (Matchup matchup in round)
-                {
-                    matchup.Tournament = tourn;
-
-                    foreach (var entry in matchup.MatchupEntries)
-                    {
-
-                        if (entry.Matchup != null)
-                        {
-
-                            entry.ParentMatchupId = entry.Matchup.Id;
-                        }
-
-                    }
-
-                    await MatchupService.Add(matchup);
-
-                }
-
-            }
-
-
-            _tournamentVM = new();
-            _selectedPrizeList.Clear();
-            _selectedTeamList.Clear();
-
-            Navigation.NavigateTo("/");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
-    }
-
-}   
-
+}

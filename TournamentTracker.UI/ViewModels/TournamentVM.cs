@@ -8,7 +8,7 @@ namespace TournamentTracker.UI.ViewModels
         public int Id { get; }
 
         [Required]
-        public string TournamentName { get; set; } = null!;
+        public string TournamentName { get; set; }
 
         [Required]
         public string EntryFee { get; set; }
@@ -41,6 +41,23 @@ namespace TournamentTracker.UI.ViewModels
             TournamentEntries = tournament.TournamentEntries;
             TournamentPrizes = tournament.TournamentPrizes;
             Matchups = tournament.Matchups;
+        }
+
+        public static Tournament CreateTournament(TournamentVM vm)
+        {
+
+            Tournament tournament = new Tournament()
+            {
+
+                TournamentName = vm.TournamentName,
+                TournamentEntries = vm.TournamentEntries,
+                TournamentPrizes = vm.TournamentPrizes,
+                Matchups = vm.Matchups
+
+            };
+
+            return tournament;
+
         }
 
     }

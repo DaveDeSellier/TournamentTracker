@@ -1,0 +1,120 @@
+﻿@page "/createtournament/checkout"
+
+<Alert IsVisible=@isVisible ErrorMessage="@ErrorMessage"></Alert>
+
+<h1>Tournament Summary</h1>
+
+<div>
+
+    <div>
+        <p>Tournament: @TournamentState?.TournamentName</p>
+    </div>
+
+    <div>
+        <p>Teams</p>
+        <ul>
+            @foreach(var entry in TournamentState?.TournamentEntries)
+            {
+                <li>@entry.Team?.TeamName
+                    <ul>
+                        @foreach(var teamMember in entry.Team?.TeamMembers)
+                        {
+                            <li>@teamMember.Person.FirstName @teamMember.Person.LastName</li>
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div>
+        <p>Prizes</p>
+        <ul>
+            @foreach(var entry in TournamentState?.TournamentPrizes)
+            {
+                <li>@entry.Prize?.PlaceName
+                    <ul>
+                        <li>Place Number: @entry.Prize?.PlaceNumber</li>
+                        <li>Prize Amount: @entry.Prize?.PrizeAmount</li>
+                        <li>Prize Percentage: @entry.Prize?.PrizePercentage</li>
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+    
+    <button type="button" @onclick="CreateTournament">Create Tournament</button>
+</div>
+
+@inherits AbstractComponent
+@inject TournamentVM TournamentState
+@inject ITournament TournamentService
+@inject NavigationManager Navigation
+@inject TournamentLogic TournamentLogic
+@inject IMatchup MatchupService
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private async Task CreateTournament()
+    {
+
+        //Create Tournament model
+        try
+        {
+
+            if (TournamentState.TournamentEntries == null || string.IsNullOrEmpty(TournamentState.TournamentName) || TournamentState.TournamentPrizes == null)
+            {
+                isVisible = true;
+                ErrorMessage = "Tournament name, team entries, or prizes could not be found.";
+                return;
+            }
+
+            var tournament = TournamentVM.CreateTournament(TournamentState);
+
+            //Save Tournament to database
+            await TournamentService.Add(tournament);
+
+            // Create Rounds
+            List<List<Matchup>> rounds = TournamentLogic.CreateRounds(tournament);
+
+            //Add Rounds
+            foreach (List<Matchup> round in rounds)
+            {
+
+                foreach (Matchup matchup in round)
+                {
+                    matchup.Tournament = tournament;
+
+                    foreach (var entry in matchup.MatchupEntries)
+                    {
+
+                        if (entry.Matchup != null)
+                        {
+
+                            entry.ParentMatchupId = entry.Matchup.Id;
+                        }
+
+                    }
+
+                    await MatchupService.Add(matchup);
+
+                }
+
+            }
+
+            Navigation.NavigateTo("/");
+
+        }catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+
+    }
+
+}
+

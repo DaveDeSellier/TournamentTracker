@@ -17,6 +17,7 @@ namespace TournamentTracker.Infrastructure.Services
             return await _context.Teams
                     .Include(teams => teams.TeamMembers)
                     .ThenInclude(teamMembers => teamMembers.Person)
+                    .AsNoTracking()
                     .ToListAsync();
         }
 

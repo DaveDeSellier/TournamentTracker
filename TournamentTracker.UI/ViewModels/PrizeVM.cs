@@ -51,5 +51,19 @@ namespace TournamentTracker.UI.ViewModels
             };
 
         }
+
+        public static Prize CreatePrize(PrizeVM vm)
+        {
+            Prize prize = new Prize()
+            {
+                Id = vm.Id,
+                PlaceName = vm.PlaceName,
+                PlaceNumber = Parser.ParseInt(vm.PlaceNumber),
+                PrizeAmount = Parser.ParseDecimal(vm.PrizeAmount)
+
+            };
+
+            return prize;
+        }
     }
 }

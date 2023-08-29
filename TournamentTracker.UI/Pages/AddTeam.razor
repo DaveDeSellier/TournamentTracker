@@ -1,4 +1,4 @@
-﻿@page "/createtournament2/addteam"
+﻿@page "/createtournament/addteam"
 
 <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage></Alert>
 
@@ -87,12 +87,6 @@
                 _teamList.Add(new TeamVM(team));
             }
 
-            var prizes = await PrizeService.List();
-
-            foreach (var prize in prizes)
-            {
-                _prizeList.Add(new PrizeVM(prize));
-            }
         }
         catch (Exception ex)
         {
@@ -191,6 +185,7 @@
 
             isVisible = true;
             ErrorMessage = "Please select more than one team!";
+            return;
 
         }
 
@@ -200,6 +195,7 @@
             var entry = new TournamentEntry()
                 {
                     TeamId = team.Id,
+                    Team = TeamVM.CreateTeam(team)
                 };
 
             entries.Add(entry);
@@ -207,7 +203,7 @@
 
         TournamentState.TournamentEntries = entries;
 
-        Navigation.NavigateTo("/createtournament2/addprize");
+        Navigation.NavigateTo("/createtournament/addprize");
 
     }
 

@@ -12,6 +12,7 @@ public partial class TournamentTrackerContext : DbContext
     public TournamentTrackerContext(DbContextOptions<TournamentTrackerContext> options)
         : base(options)
     {
+
     }
 
     public virtual DbSet<Matchup> Matchups { get; set; }
@@ -31,10 +32,6 @@ public partial class TournamentTrackerContext : DbContext
     public virtual DbSet<TournamentEntry> TournamentEntries { get; set; }
 
     public virtual DbSet<TournamentPrize> TournamentPrizes { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-6QE2B0K;Initial Catalog=TournamentTracker;Integrated Security=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
