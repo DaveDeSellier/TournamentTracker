@@ -134,7 +134,7 @@ namespace TournamentTracker.Core
 
         }
 
-        public static Tournament CreateTournament(TournamentVM vm)
+        public static Tournament CreateTournament(Tournament vm)
         {
 
             Tournament tournament = new Tournament()

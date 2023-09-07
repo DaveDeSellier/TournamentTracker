@@ -8,6 +8,7 @@
 
     <div>
         <p>Tournament: @TournamentState?.TournamentName</p>
+        <p>Entry Fee: @TournamentState?.EntryFee</p>
     </div>
 
     <div>
@@ -76,35 +77,7 @@
             var tournament = TournamentVM.CreateTournament(TournamentState);
 
             //Save Tournament to database
-            await TournamentService.Add(tournament);
-
-            // Create Rounds
-            List<List<Matchup>> rounds = TournamentLogic.CreateRounds(tournament);
-
-            //Add Rounds
-            foreach (List<Matchup> round in rounds)
-            {
-
-                foreach (Matchup matchup in round)
-                {
-                    matchup.Tournament = tournament;
-
-                    foreach (var entry in matchup.MatchupEntries)
-                    {
-
-                        if (entry.Matchup != null)
-                        {
-
-                            entry.ParentMatchupId = entry.Matchup.Id;
-                        }
-
-                    }
-
-                    await MatchupService.Add(matchup);
-
-                }
-
-            }
+            await TournamentService.InsertTournament(tournament);
 
             Navigation.NavigateTo("/");
 

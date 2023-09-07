@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TournamentTracker.Core.Models;
+using TournamentTracker.Core.Utils;
 
 namespace TournamentTracker.UI.ViewModels
 {
@@ -48,7 +49,7 @@ namespace TournamentTracker.UI.ViewModels
 
             Tournament tournament = new Tournament()
             {
-
+                EntryFee = Parser.ParseDecimal(vm.EntryFee),
                 TournamentName = vm.TournamentName,
                 TournamentEntries = vm.TournamentEntries,
                 TournamentPrizes = vm.TournamentPrizes,
