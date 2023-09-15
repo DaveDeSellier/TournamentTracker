@@ -20,8 +20,6 @@ namespace TournamentTracker.UI.ViewModels
         [Required]
         public string PhoneNumber { get; set; } = null!;
 
-        public Person Person { get; } = new();
-
         public string FullName
         {
             get
@@ -35,25 +33,19 @@ namespace TournamentTracker.UI.ViewModels
 
         }
 
-        public PersonVM(string firstName, string lastName, string emailAddress, string phoneNumber)
-        {
-            Person = new()
-            {
-                FirstName = firstName.Trim(),
-                LastName = lastName.Trim(),
-                EmailAddress = emailAddress.Trim(),
-                PhoneNumber = phoneNumber.Trim()
-
-            };
-        }
-
         public PersonVM(Person person)
         {
             Id = person.Id;
-            FirstName = person.FirstName;
+            FirstName = person.FirstName.Trim();
             LastName = person.LastName;
             EmailAddress = person.EmailAddress;
             PhoneNumber = person.PhoneNumber;
+        }
+
+        public static Person CreatePerson(PersonVM vm)
+        {
+            return new Person() { FirstName = vm.FirstName, LastName = vm.LastName, EmailAddress = vm.EmailAddress, PhoneNumber = vm.PhoneNumber };
+
         }
 
     }

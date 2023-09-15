@@ -1,7 +1,4 @@
-﻿@inject IPerson PersonService
-@inject ITeam TeamService
-
-<PageTitle>Create Team</PageTitle>
+﻿<PageTitle>Create Team</PageTitle>
 
 @if (isVisible)
 {
@@ -53,6 +50,8 @@
 <AddTeamMember OnClickCallback="@AddToTeamDropDown"/>
 
 @inherits AbstractComponent
+@inject IPerson PersonService
+@inject ITeam TeamService
 
 @code {
     private TeamVM _teamVM = new();
@@ -131,9 +130,7 @@
         try
         {
             //Create a team record in the database
-            var team = new TeamVM(_teamVM.TeamName, _selectedTeamMembersList);
-
-            var teamRecord = await TeamService.AddTeamAsync(team.Team);
+            var teamRecord = TeamVM.CreateTeam(_teamVM.TeamName, _selectedTeamMembersList);
 
             _selectedTeamMembersList.Clear();
 

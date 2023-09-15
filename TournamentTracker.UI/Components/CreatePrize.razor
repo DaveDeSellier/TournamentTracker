@@ -50,11 +50,8 @@
 
         try
         {
-            var prize = new PrizeVM(_prizeVM.PlaceName, _prizeVM.PlaceNumber, _prizeVM.PrizeAmount, _prizeVM.PrizePercentage);
 
-            var entry = await _service.AddAndReturnPrize(prize.Prize);
-
-            await OnClickCallBack.InvokeAsync(new PrizeVM(entry));
+            await OnClickCallBack.InvokeAsync(_prizeVM);
 
             _prizeVM = new();
 

@@ -19,7 +19,7 @@
 
             @if (ShowPrizeForm)
             {
-                <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
+                <Modal Heading="Create Prize" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
                     <CreatePrize OnClickCallBack="@AddPrizeToDropDown" OnClose="@CloseModal" />
                 </Modal>
             }
@@ -106,7 +106,6 @@
     private void AddPrizeToDropDown(PrizeVM prize)
     {
         _prizeList.Add(prize);
-        _selectedPrizeList.Add(prize);
     }
 
     private void isPrizeFormVisible()
@@ -148,7 +147,8 @@
 
                 var tournamentPrize = new TournamentPrize()
                 {
-                        Prize = PrizeVM.CreatePrize(prize)
+                        Prize = PrizeVM.CreatePrize(prize),
+                  
                     };
 
                 prizes.Add(tournamentPrize);
@@ -157,7 +157,8 @@
         }
         catch (Exception ex)
         {
-
+            isVisible = true;
+            ErrorMessage = ex.Message;
         }
 
         TournamentState.TournamentPrizes = prizes;

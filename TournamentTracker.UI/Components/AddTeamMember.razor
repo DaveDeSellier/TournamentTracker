@@ -50,9 +50,7 @@
         try
         {
 
-            var person = new PersonVM(_personVM.FirstName, _personVM.LastName, _personVM.EmailAddress, _personVM.PhoneNumber);
-
-            var entity = await PersonService.CreatePerson(person.Person);
+            var entity = PersonVM.CreatePerson(_personVM);
 
             await OnClickCallback.InvokeAsync(new PersonVM(entity));
 

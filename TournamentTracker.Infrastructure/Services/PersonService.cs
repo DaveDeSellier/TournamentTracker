@@ -11,7 +11,7 @@ namespace TournamentTracker.Infrastructure.Services
             _context = context;
         }
 
-        public async Task<Person> CreatePerson(Person person)
+        public async Task<Person> CreateAsync(Person person)
         {
             _context.Add(person);
             await _context.SaveChangesAsync();

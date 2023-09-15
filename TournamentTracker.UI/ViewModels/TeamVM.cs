@@ -12,8 +12,6 @@ namespace TournamentTracker.UI.ViewModels
 
         public ICollection<TeamMember> TeamMembers { get; set; }
 
-        public Team Team { get; } = new();
-
         public TeamVM()
         {
 
@@ -26,18 +24,18 @@ namespace TournamentTracker.UI.ViewModels
             TeamMembers = team.TeamMembers;
         }
 
-        public TeamVM(string teamName, List<PersonVM> list)
+        public static Team CreateTeam(string teamName, List<PersonVM> personList)
         {
-            Team = new()
+
+            return new Team()
             {
-                Id = Team.Id,
                 TeamName = teamName,
-                TeamMembers = ConvertToTeamMemberList(list)
+                TeamMembers = ConvertToTeamMemberList(personList)
             };
 
         }
 
-        private List<TeamMember> ConvertToTeamMemberList(List<PersonVM> list)
+        private static List<TeamMember> ConvertToTeamMemberList(List<PersonVM> list)
         {
 
             List<TeamMember> result = new List<TeamMember>();
@@ -48,7 +46,7 @@ namespace TournamentTracker.UI.ViewModels
                 var member = new TeamMember()
                 {
 
-                    PersonId = person.Id,
+                    Person = PersonVM.CreatePerson(person)
 
                 };
 

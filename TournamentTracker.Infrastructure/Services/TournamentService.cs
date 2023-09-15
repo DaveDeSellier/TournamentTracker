@@ -19,10 +19,6 @@ namespace TournamentTracker.Infrastructure.Services
 
             var transaction = _context.Database.BeginTransaction();
 
-            Console.WriteLine(_context.ChangeTracker.DebugView.LongView);
-
-            _context.ChangeTracker.Clear();
-
             try
             {
 
@@ -32,9 +28,46 @@ namespace TournamentTracker.Infrastructure.Services
 
                 var lastTournament = _context.Tournaments.Find(tournamentRecord.Id);
 
-                lastTournament.TournamentEntries = tournament.TournamentEntries;
+                foreach (var team in tournament.TournamentEntries)
+                {
 
-                lastTournament.TournamentPrizes = tournament.TournamentPrizes;
+                    var teamRecord = _context.Teams.Find(team.Team.Id);
+
+                    if (teamRecord != null)
+                    {
+
+                        lastTournament.TournamentEntries.Add(new TournamentEntry() { Team = teamRecord });
+
+
+                    }
+                    else
+                    {
+
+
+                        lastTournament.TournamentEntries.Add(team);
+
+                    }
+
+                }
+
+
+                foreach (var prize in tournament.TournamentPrizes)
+                {
+
+
+                    var prizeRecord = _context.Prizes.Find(prize.Prize.Id);
+
+                    if (prizeRecord != null)
+                    {
+                        lastTournament.TournamentPrizes.Add(new TournamentPrize() { Prize = prizeRecord });
+                    }
+                    else
+                    {
+                        lastTournament.TournamentPrizes.Add(prize);
+                    }
+
+                }
+
 
                 // Create Rounds
                 List<List<Matchup>> rounds = _tournamentLogic.CreateRounds(lastTournament);

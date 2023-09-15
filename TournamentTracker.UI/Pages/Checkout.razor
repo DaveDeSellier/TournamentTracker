@@ -20,7 +20,7 @@
                     <ul>
                         @foreach(var teamMember in entry.Team?.TeamMembers)
                         {
-                            <li>@teamMember.Person.FirstName @teamMember.Person.LastName</li>
+                            <li>@teamMember.Person?.FirstName @teamMember.Person?.LastName</li>
                         }
                     </ul>
                 </li>

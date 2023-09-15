@@ -20,8 +20,6 @@ namespace TournamentTracker.UI.ViewModels
         [Required]
         public string PrizePercentage { get; set; }
 
-        public Prize Prize { get; } = new();
-
         public PrizeVM()
         {
 
@@ -34,22 +32,6 @@ namespace TournamentTracker.UI.ViewModels
             PlaceNumber = prize.PlaceNumber.ToString();
             PrizeAmount = prize.PrizeAmount.ToString();
             PrizePercentage = prize.PrizePercentage.ToString();
-        }
-
-
-        public PrizeVM(string placeName, string placeNumber, string prizeAmount, string prizePercentage)
-        {
-
-            Prize = new()
-            {
-
-                PlaceName = placeName,
-                PlaceNumber = Parser.ParseInt(placeNumber),
-                PrizeAmount = Parser.ParseDecimal(prizeAmount),
-                PrizePercentage = Parser.ParseDouble(prizePercentage)
-
-            };
-
         }
 
         public static Prize CreatePrize(PrizeVM vm)

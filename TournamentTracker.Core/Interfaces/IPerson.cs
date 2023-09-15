@@ -4,6 +4,6 @@ namespace TournamentTracker.Core.Interfaces
 {
     public interface IPerson : IRepository<Person>
     {
-        Task<Person> CreatePerson(Person person);
+        Task<Person> CreateAsync(Person person);
     }
 }
