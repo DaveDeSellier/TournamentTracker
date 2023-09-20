@@ -169,15 +169,15 @@
             {
                 matchup.MatchupEntries[0].Score = null;
                 matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+                _currentMatchup.WinnerId = matchup.Winner.Id;
 
 
                 if (matchupEntry.Count > 0)
                 {
                     matchupEntry[0].TeamCompeting = matchup.Winner;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
                     await MatchUpEntryService.Edit(matchupEntry[0]);
                 }
-
-                await MatchupService.Edit(matchup);
 
             }//Non-bye matchup
             else if (matchup?.MatchupEntries.Count == 2 )
@@ -200,16 +200,19 @@
                 else if (_scoreOfTeamOne > _scoreOfTeamTwo)
                 {
                     matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
 
                 }
                 else
                 {
                     matchup.Winner = matchup.MatchupEntries[1].TeamCompeting;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
                 }
 
                 if (matchupEntry.Count > 0)
                 {
                     matchupEntry[0].TeamCompeting = matchup.Winner;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
                     await MatchUpEntryService.Edit(matchupEntry[0]);
                 }
 
