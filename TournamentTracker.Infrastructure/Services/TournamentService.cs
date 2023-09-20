@@ -8,6 +8,7 @@ namespace TournamentTracker.Infrastructure.Services
     {
         private readonly TournamentTrackerContext _context;
         private readonly TournamentLogic _tournamentLogic;
+
         public TournamentService(TournamentTrackerContext context, TournamentLogic tournamentLogic) : base(context)
         {
             _context = context;
@@ -79,6 +80,8 @@ namespace TournamentTracker.Infrastructure.Services
                     foreach (Matchup matchup in round)
                     {
 
+                        matchup.Tournament = lastTournament;
+
                         foreach (var entry in matchup.MatchupEntries)
                         {
 
@@ -90,7 +93,8 @@ namespace TournamentTracker.Infrastructure.Services
 
                         }
 
-                        lastTournament.Matchups.Add(matchup);
+                        _context.Matchups.Add(matchup);
+                        await _context.SaveChangesAsync();
 
                     }
 
