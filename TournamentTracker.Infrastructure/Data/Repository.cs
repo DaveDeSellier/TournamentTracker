@@ -5,10 +5,11 @@ using TournamentTracker.Core.Models.Abstract;
 
 namespace TournamentTracker.Infrastructure
 {
-    public abstract class Repository<T> : IRepository<T> where T : BaseModel
+    public class Repository<T> : IRepository<T> where T : BaseModel
     {
 
         private readonly TournamentTrackerContext _context;
+
 
         public Repository(TournamentTrackerContext context)
         {
@@ -19,7 +20,6 @@ namespace TournamentTracker.Infrastructure
         {
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
-
         }
 
         public virtual async Task Delete(T entity)

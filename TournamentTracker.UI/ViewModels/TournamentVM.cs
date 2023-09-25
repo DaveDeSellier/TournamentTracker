@@ -14,15 +14,11 @@ namespace TournamentTracker.UI.ViewModels
         [Required]
         public string EntryFee { get; set; }
 
-        public List<Team> EnteredTeams = new List<Team>();
-
         public virtual ICollection<Matchup> Matchups { get; set; } = new List<Matchup>();
 
         public virtual ICollection<TournamentEntry> TournamentEntries { get; set; } = new List<TournamentEntry>();
 
         public virtual ICollection<TournamentPrize> TournamentPrizes { get; set; } = new List<TournamentPrize>();
-
-        public List<List<Matchup>> Rounds { get; set; } = new List<List<Matchup>>();
 
         public TournamentVM()
         {

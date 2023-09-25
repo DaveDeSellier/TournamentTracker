@@ -27,6 +27,7 @@
 @inherits AbstractComponent
 @inject ITournament TournamentService
 @inject NavigationManager Navigation
+@inject ILogger<Index> Logger
 
 @code {
     private List<TournamentVM> _tournaments = new();
@@ -39,6 +40,7 @@
 
         isVisible = false;
         ErrorMessage = "";
+        Logger.LogInformation("Index page");
 
         try
         {
@@ -54,8 +56,11 @@
         }
         catch (Exception ex)
         {
+            Guid guid = new Guid();
             isVisible = true;
-            ErrorMessage = ex.Message;
+            ErrorMessage = $"{guid}: Failed to load tournaments";
+            Logger.LogError($"{guid}: Failed to load tournaments {ex.StackTrace} {ex.Message}");
+
         }
 
     }

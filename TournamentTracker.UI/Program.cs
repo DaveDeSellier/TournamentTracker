@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
@@ -20,8 +21,18 @@ builder.Services.AddTransient<ITeamMember, TeamMemberService>();
 builder.Services.AddTransient<IMatchup, MatchupService>();
 builder.Services.AddTransient<ITournament, TournamentService>();
 builder.Services.AddTransient<IMatchupEntry, MatchupEntryService>();
+builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();
+
+
+var logger = new LoggerConfiguration()
+.ReadFrom.Configuration(builder.Configuration)
+.CreateLogger();
+
+builder.Logging.ClearProviders();
+
+builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 
