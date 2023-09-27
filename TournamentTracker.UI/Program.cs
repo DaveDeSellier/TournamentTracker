@@ -13,7 +13,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<TournamentTrackerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConn")));
-//builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<IPrize, PrizeService>();
 builder.Services.AddTransient<IPerson, PersonService>();
 builder.Services.AddTransient<ITeam, TeamService>();
@@ -25,12 +24,9 @@ builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();
 
-
 var logger = new LoggerConfiguration()
 .ReadFrom.Configuration(builder.Configuration)
 .CreateLogger();
-
-builder.Logging.ClearProviders();
 
 builder.Logging.AddSerilog(logger);
 
