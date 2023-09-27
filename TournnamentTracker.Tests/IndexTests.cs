@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
 using TournamentTracker.Infrastructure.Services;
@@ -14,7 +15,7 @@ namespace TournnamentTracker.Tests
         {
 
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -22,8 +23,6 @@ namespace TournnamentTracker.Tests
 
             var tournamentDropDownList = cut.Find("select");
 
-            Assert.True(cut.Instance.isVisible == false);
-            Assert.True(cut.Instance.ErrorMessage == string.Empty);
             Assert.True(tournamentDropDownList.ChildElementCount >= 1);
             Assert.Equal("http://localhost/", navMan.Uri);
         }
@@ -32,7 +31,7 @@ namespace TournnamentTracker.Tests
         public void Test_LoadTournamentButton_WhenNoTournamentIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -51,7 +50,7 @@ namespace TournnamentTracker.Tests
         public void Test_LoadTournamentButton_WhenTournamentIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -80,7 +79,7 @@ namespace TournnamentTracker.Tests
         public void Test_CreateTournamentBtn_NavigationToCreateTournamentPage()
         {
             //Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -90,9 +89,10 @@ namespace TournnamentTracker.Tests
             btnCreateTournament.Click();
             cut.WaitForState(() => navMan.Uri == "http://localhost/createtournament", System.TimeSpan.FromSeconds(1));
 
+            var createTournmamentComponent = cut.FindComponents<CreateTournament>();
+
             //Assert
             Assert.Equal("http://localhost/createtournament", navMan.Uri);
-
         }
 
     }

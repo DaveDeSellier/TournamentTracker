@@ -18,7 +18,7 @@ namespace TournnamentTracker.Tests
         {
 
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
@@ -44,7 +44,7 @@ namespace TournnamentTracker.Tests
         public void Test_AddToTeamListButton_WhenNoTeamIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
@@ -69,7 +69,7 @@ namespace TournnamentTracker.Tests
         public async void Test_AddToTeamListButton_WhenATeamIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext()));
+            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
