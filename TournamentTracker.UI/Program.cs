@@ -16,10 +16,8 @@ builder.Services.AddDbContext<TournamentTrackerContext>(options =>
 builder.Services.AddTransient<IPrize, PrizeService>();
 builder.Services.AddTransient<IPerson, PersonService>();
 builder.Services.AddTransient<ITeam, TeamService>();
-builder.Services.AddTransient<ITeamMember, TeamMemberService>();
 builder.Services.AddTransient<IMatchup, MatchupService>();
 builder.Services.AddTransient<ITournament, TournamentService>();
-builder.Services.AddTransient<IMatchupEntry, MatchupEntryService>();
 builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();

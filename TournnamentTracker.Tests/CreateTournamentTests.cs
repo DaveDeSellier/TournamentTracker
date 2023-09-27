@@ -21,7 +21,6 @@ namespace TournnamentTracker.Tests
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
-            Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
             Services.AddSingleton<IPrize>(new PrizeService(new TournamentTrackerContext()));
             Services.AddSingleton<TournamentLogic>();
 
@@ -47,7 +46,6 @@ namespace TournnamentTracker.Tests
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
-            Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
             Services.AddSingleton<IPrize>(new PrizeService(new TournamentTrackerContext()));
             Services.AddSingleton<TournamentLogic>();
 
@@ -72,7 +70,6 @@ namespace TournnamentTracker.Tests
             Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             Services.AddSingleton<ITeam>(new TeamService(new TournamentTrackerContext()));
             Services.AddSingleton<IMatchup>(new MatchupService(new TournamentTrackerContext()));
-            Services.AddSingleton<IMatchupEntry>(new MatchupEntryService(new TournamentTrackerContext()));
             Services.AddSingleton<IPrize>(new PrizeService(new TournamentTrackerContext()));
             Services.AddSingleton<TournamentLogic>();
 
