@@ -1,4 +1,5 @@
-﻿using TournamentTracker.Core.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
 
 namespace TournamentTracker.Infrastructure.Services
@@ -6,7 +7,7 @@ namespace TournamentTracker.Infrastructure.Services
     public class PersonService : Repository<Person>, IPerson
     {
         private readonly TournamentTrackerContext _context;
-        public PersonService(TournamentTrackerContext context) : base(context)
+        public PersonService(TournamentTrackerContext context, ILogger<PersonService> logger) : base(context, logger)
         {
             _context = context;
         }

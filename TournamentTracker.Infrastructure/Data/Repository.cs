@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models.Abstract;
@@ -9,23 +10,39 @@ namespace TournamentTracker.Infrastructure
     {
 
         private readonly TournamentTrackerContext _context;
+        protected readonly ILogger _logger;
 
-
-        public Repository(TournamentTrackerContext context)
+        public Repository(TournamentTrackerContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public virtual async Task Add(T entity)
         {
-            _context.Set<T>().Add(entity);
-            await _context.SaveChangesAsync();
+            _logger.LogInformation("Adding entity");
+            try
+            {
+                _context.Set<T>().Add(entity);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error: Could not add entity {ex.Message} {ex.StackTrace}");
+            }
         }
 
         public virtual async Task Delete(T entity)
         {
-            _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Set<T>().Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error: Could not delete entity {ex.Message} {ex.StackTrace}");
+            }
         }
 
         public virtual async Task Edit(T entity)
@@ -46,7 +63,21 @@ namespace TournamentTracker.Infrastructure
 
         public virtual async Task<List<T>> List()
         {
-            return await _context.Set<T>().AsNoTracking().ToListAsync();
+
+            _logger.LogInformation("Getting list");
+
+            var list = new List<T>();
+            try
+            {
+                list = await _context.Set<T>().AsNoTracking().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error: Could not get list {ex.Message} {ex.StackTrace}");
+            }
+
+            return list;
+
         }
 
         public virtual async Task<List<T>?> List(Expression<Func<T, bool>> predicate)

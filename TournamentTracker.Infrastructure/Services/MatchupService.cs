@@ -1,4 +1,5 @@
-﻿using TournamentTracker.Core.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
 
 namespace TournamentTracker.Infrastructure.Services
@@ -6,7 +7,8 @@ namespace TournamentTracker.Infrastructure.Services
     public class MatchupService : Repository<Matchup>, IMatchup
     {
         private readonly TournamentTrackerContext _context;
-        public MatchupService(TournamentTrackerContext context) : base(context)
+
+        public MatchupService(TournamentTrackerContext context, ILogger<MatchupService> logger) : base(context, logger)
         {
             _context = context;
         }

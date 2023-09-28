@@ -1,4 +1,5 @@
-﻿using TournamentTracker.Core;
+﻿using Microsoft.Extensions.Logging;
+using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
 
@@ -9,7 +10,7 @@ namespace TournamentTracker.Infrastructure.Services
         private readonly TournamentTrackerContext _context;
         private readonly TournamentLogic _tournamentLogic;
 
-        public TournamentService(TournamentTrackerContext context, TournamentLogic tournamentLogic) : base(context)
+        public TournamentService(TournamentTrackerContext context, TournamentLogic tournamentLogic, ILogger<TournamentService> logger) : base(context, logger)
         {
             _context = context;
             _tournamentLogic = tournamentLogic;

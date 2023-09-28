@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
 
@@ -8,7 +9,7 @@ namespace TournamentTracker.Infrastructure.Services
     {
         private readonly TournamentTrackerContext _context;
 
-        public TeamService(TournamentTrackerContext context) : base(context)
+        public TeamService(TournamentTrackerContext context, ILogger<TeamService> logger) : base(context, logger)
         {
             _context = context;
         }
