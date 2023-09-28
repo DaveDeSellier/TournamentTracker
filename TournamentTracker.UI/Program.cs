@@ -18,6 +18,7 @@ builder.Services.AddTransient<IPerson, PersonService>();
 builder.Services.AddTransient<ITeam, TeamService>();
 builder.Services.AddTransient<IMatchup, MatchupService>();
 builder.Services.AddTransient<ITournament, TournamentService>();
+builder.Services.AddTransient<IMatchUpEntry, MatchupEntryService>();
 builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();
