@@ -10,12 +10,12 @@
     <div>
         <div class="form-group w-25">
             <label>Tournament Name </label>
-            <InputText id="" class="form-control" @bind-Value=TournamentState.TournamentName/>
+            <InputText class="form-control" @bind-Value=TournamentState.TournamentName/>
         </div>
 
         <div class="mt-4 form-group-item w-25">
             <label>Entry Fee</label>
-            <InputNumber id="" class="form-control" @bind-Value=TournamentState.EntryFee/>
+            <InputNumber class="form-control" @bind-Value=TournamentState.EntryFee/>
         </div>
     </div>
     <button class="mt-4 btn btn-primary" type="submit">Next</button>
@@ -23,13 +23,59 @@
 
 @inject NavigationManager Navigation
 @inject TournamentVM TournamentState
+@inject ITournament TournamentService
 @inherits AbstractComponent
+@inject ILogger<CreateTournament> Logger
 
 @code {
-
-    private void Next()
+    protected override void OnInitialized()
     {
-        Navigation.NavigateTo("/createtournament/addteam");
+        TournamentState.EntryFee = null;
+        TournamentState.TournamentName = string.Empty;
     }
+
+    private async Task Next()
+    {
+
+        bool success = await Validate();
+        if (success)
+        {
+            Navigation.NavigateTo("/createtournament/addteam");
+        }
+        else
+        {
+            isVisible = true;
+            ErrorMessage = $"Please enter a new tournament name. This tournament already exists";
+        }
+
+    }
+
+    private async Task<bool> Validate()
+    {
+
+
+        var tournamentRecord = new List<Core.Models.Tournament>();
+
+        try
+        {
+             tournamentRecord = await TournamentService.List(x => x.TournamentName == TournamentState.TournamentName);
+        }
+        catch (Exception ex)
+        {
+            Guid guid = new Guid();
+            isVisible = true;
+            ErrorMessage = $"{guid}: Failed to check tournament";
+            Logger.LogError($"{guid} Error: Failed to check tournament {ex.Message} {ex.StackTrace}");
+        }
+
+        if (tournamentRecord?.Count > 0)
+        {
+            return false;
+        }
+
+        return true;
+
+    }
+
 
 }
