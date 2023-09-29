@@ -1,10 +1,5 @@
 ﻿<PageTitle>Create Prize</PageTitle>
 
-@if (isVisible)
-{
-    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
-}
-
 <div>
     <EditForm Model="@_prizeVM" OnValidSubmit="@HandleSubmit">
         <DataAnnotationsValidator/>
