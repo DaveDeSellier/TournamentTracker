@@ -59,7 +59,7 @@
             Guid guid = new Guid();
             isVisible = true;
             ErrorMessage = $"{guid}: Failed to load tournaments";
-            Logger.LogError($"{guid}: Failed to load tournaments {ex.StackTrace} {ex.Message}");
+            Logger.LogError($"{guid}: Failed to load tournaments {ex.Message} {ex.StackTrace}");
 
         }
 

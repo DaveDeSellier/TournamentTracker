@@ -53,6 +53,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject IPrize PrizeService
+@inject ILogger<AddPrize> Logger
 
 @code {
 
@@ -82,20 +83,37 @@
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to retrieve prizes";
+            Logger.LogError($"{guid}: Failed to retrieve prizes {ex.Message} {ex.StackTrace}");
         }
 
     }
 
     private void AddPrizeToSelectedList() 
     { 
-        if (_selectedPrize == null) return;
+        if (_selectedPrize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Please select a prize!";
+            return;
+        };
 
         var prize = _prizeList.Find(x => x.PlaceName == _selectedPrize);
 
-        if (prize == null) return;
+        if (prize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize does not exist";
+            return;
+        }
 
-        if (_selectedPrizeList.Contains(prize)) return;
+        if (_selectedPrizeList.Contains(prize))
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize has already been selected";
+            return;
+        }
 
         _selectedPrizeList.Add(prize);
 
@@ -117,11 +135,19 @@
     private void RemoveSelectedPrize(int id)
     {
 
-        var team = _selectedPrizeList.Find(x => x.Id == id);
+        isVisible = true;
+        ErrorMessage = string.Empty;
 
-        if (team == null) return;
+        var prize = _selectedPrizeList.Find(x => x.Id == id);
 
-        _selectedPrizeList.Remove(team);
+        if (prize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize does not exist";
+            return;
+        }
+
+        _selectedPrizeList.Remove(prize);
 
         ShowSelectedPrizeList = _selectedPrizeList.Count > 0;
 
@@ -130,6 +156,8 @@
 
     public void ToCheckOut()
     {
+        isVisible = true;
+        ErrorMessage = string.Empty;
         List<TournamentPrize> prizes = new();
 
         if (_selectedPrizeList.Count == 0)
@@ -139,28 +167,20 @@
             return;
         }
 
-        try
+
+        foreach (var prize in _selectedPrizeList)
         {
 
-            foreach (var prize in _selectedPrizeList)
+            var tournamentPrize = new TournamentPrize()
             {
-
-                var tournamentPrize = new TournamentPrize()
-                {
-                        Prize = PrizeVM.CreatePrize(prize),
+                    Prize = PrizeVM.CreatePrize(prize),
                   
-                    };
+                };
 
-                prizes.Add(tournamentPrize);
+            prizes.Add(tournamentPrize);
 
-            }
         }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
-
+   
         TournamentState.TournamentPrizes = prizes;
 
         Navigation.NavigateTo("/createtournament/checkout");
@@ -170,18 +190,11 @@
     private async Task OpenModal()
     {
 
-    isVisible = false;
-    ErrorMessage = string.Empty;
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
-        try
-        {
-            await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
+        await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+      
     }
 
     private async Task CloseModal()
@@ -192,17 +205,8 @@
 
         if (ShowPrizeForm) ShowPrizeForm = !ShowPrizeForm;
 
-        try
-        {
-            await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
-
+       await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+       
     }
-
 
 }

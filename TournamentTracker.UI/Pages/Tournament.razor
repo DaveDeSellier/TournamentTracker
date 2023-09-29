@@ -85,6 +85,7 @@
 @inject ITournament TournamentService
 @inject IMatchup MatchupService
 @inject IMatchUpEntry MatchUpEntryService
+@inject ILogger<Tournament> Logger
 @inherits AbstractComponent
 
 @code {
@@ -122,8 +123,11 @@
         }
         catch (Exception ex)
         {
+            Guid guid = new Guid();
             isVisible = true;
-            ErrorMessage = ex.Message;
+            ErrorMessage = $"{guid}: Failed to load tournament";
+            Logger.LogError($"{guid}: Failed to load tournament {ex.Message} {ex.StackTrace}");
+
         }
 
     }
@@ -152,10 +156,18 @@
             List<MatchupEntry> matchupEntry = new();
             Matchup? matchup = null;
 
-            if (_currentMatchup == null) return;
+            if (_currentMatchup != null)
+            {
 
-            matchup = await MatchupService.GetById(_currentMatchup.Id);
-            matchupEntry = await MatchUpEntryService.List(x => x.ParentMatchupId == _currentMatchup.Id);
+                matchup = await MatchupService.GetById(_currentMatchup.Id);
+                matchupEntry = await MatchUpEntryService.List(x => x.ParentMatchupId == _currentMatchup.Id);
+
+            }
+            {
+                isVisible = true;
+                ErrorMessage = $"Please select a matchup";
+                return;
+            }
 
             //If matchup has yet to be determined 
 
@@ -226,7 +238,9 @@
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to save score";
+            Logger.LogError($"{guid}: Failed to save score {ex.Message} {ex.StackTrace}");
         }
     }
 
@@ -307,7 +321,7 @@
 
                     if (matchup.MatchupEntries.Count < 2)
                     {
-                        s = $"{matchupEntry.TeamCompeting.TeamName} VS. Bye";
+                        s = $"{matchupEntry.TeamCompeting?.TeamName} VS. Bye";
                     }
                     else
                     {
@@ -355,7 +369,9 @@
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to create match up list";
+            Logger.LogError($"{guid}: Failed to create match up list {ex.Message} {ex.StackTrace}");
         }
 
         return matches;
@@ -386,7 +402,7 @@
             }
             else
             {
-                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting != null ? _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName : null;
+                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting != null ? _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName : string.Empty;
                 _teamTwo = _currentMatchup.MatchupEntries[1].TeamCompeting != null ? _currentMatchup.MatchupEntries[1].TeamCompeting.TeamName : "TBD";
                 _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
                 _scoreOfTeamTwo = _currentMatchup.MatchupEntries[1].Score;
@@ -395,7 +411,9 @@
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to update team list";
+            Logger.LogError($"{guid}: Faile to update team list {ex.Message} {ex.StackTrace}");
         }
     }
 }

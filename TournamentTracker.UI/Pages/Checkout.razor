@@ -53,6 +53,7 @@
 @inject NavigationManager Navigation
 @inject TournamentLogic TournamentLogic
 @inject IMatchup MatchupService
+@inject ILogger<Checkout> Logger
 
 @code {
     protected override Task OnInitializedAsync()
@@ -84,7 +85,9 @@
         }catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to create tournament";
+            Logger.LogError($"{guid}: Failed to create tournament {ex.Message} {ex.StackTrace}");
         }
 
     }

@@ -56,6 +56,7 @@
 @inject ITeam TeamService
 @inject TournamentVM TournamentState
 @inject IJSRuntime JS
+@inject ILogger<AddTeam> Logger
 
 @code {
 
@@ -91,20 +92,42 @@
         catch (Exception ex)
         {
             isVisible = true;
-            ErrorMessage = ex.Message;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to retrieve teams";
+            Logger.LogError($"{guid}: Failed to retrieve teams {ex.Message} {ex.StackTrace}");
         }
 
     }
 
     private void AddTeamToList()
     {
-        if (_selectedTeam == null) return;
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        if (_selectedTeam == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Please select a team!";
+            return;
+        }
 
         var team = _teamList.Find(x => x.TeamName == _selectedTeam);
 
-        if (team == null) return;
+        if (team == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Team could not be found!";
+            return;
+        }
 
-        if (_selectedTeamList.Contains(team)) return;
+        if (_selectedTeamList.Contains(team))
+        {
+
+            isVisible = true;
+            ErrorMessage = $"Team has already been selected!";
+            return;
+        }
 
         _selectedTeamList.Add(team);
 
@@ -147,25 +170,24 @@
 
         ShowTeamForm = !ShowTeamForm;
 
-        try
-        {
-            await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
+        await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
 
     }
 
 
     private void RemoveSelectedTeam(int id)
     {
+        isVisible = false;
+        ErrorMessage = string.Empty;
 
         var team = _selectedTeamList.Find(x => x.Id == id);
 
-        if (team == null) return;
+        if (team == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Team could not be found!";
+            return;
+        }
 
         _selectedTeamList.Remove(team);
 

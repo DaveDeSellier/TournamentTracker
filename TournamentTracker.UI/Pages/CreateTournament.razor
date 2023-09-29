@@ -4,7 +4,7 @@
 
 <h1>Create Tournament</h1>
 
-<EditForm Model="@TournamentState" OnValidSubmit="Next">
+<EditForm Model="@TournamentState" OnValidSubmit="@Next">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div>
@@ -15,7 +15,7 @@
 
         <div class="mt-4 form-group-item w-25">
             <label>Entry Fee</label>
-            <InputText id="" class="form-control" @bind-Value=TournamentState.EntryFee/>
+            <InputNumber id="" class="form-control" @bind-Value=TournamentState.EntryFee/>
         </div>
     </div>
     <button class="mt-4 btn btn-primary" type="submit">Next</button>
@@ -29,17 +29,7 @@
 
     private void Next()
     {
-
-        try
-        {
-            Navigation.NavigateTo("/createtournament/addteam");
-        }
-        catch (Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = "Failed to create tournament";
-        }
-
+        Navigation.NavigateTo("/createtournament/addteam");
     }
 
 }
