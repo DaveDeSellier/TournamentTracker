@@ -16,17 +16,43 @@
             }
 
             return 0;
+
         }
 
         public static double ParseDouble(string s)
         {
 
-            return double.Parse(s);
+            double number;
+
+            var success = double.TryParse(s, out number);
+
+            if (success)
+            {
+                return number;
+            }
+            else
+            {
+
+                throw new InvalidDataException("Enter a valid amount");
+            }
+
+
         }
 
         public static decimal ParseDecimal(string s)
         {
-            return decimal.Parse(s);
+            decimal number;
+
+            bool success = decimal.TryParse(s, out number);
+
+            if (success)
+            {
+                return number;
+            }
+            else
+            {
+                throw new InvalidDataException("Enter a valid amount");
+            }
         }
 
 

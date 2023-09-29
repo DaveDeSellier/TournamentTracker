@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TournamentTracker.Core.Models;
-using TournamentTracker.Core.Utils;
 
 namespace TournamentTracker.UI.ViewModels
 {
@@ -12,7 +11,7 @@ namespace TournamentTracker.UI.ViewModels
         public string TournamentName { get; set; }
 
         [Required]
-        public string EntryFee { get; set; }
+        public decimal EntryFee { get; set; }
 
         public virtual ICollection<Matchup> Matchups { get; set; } = new List<Matchup>();
 
@@ -45,7 +44,7 @@ namespace TournamentTracker.UI.ViewModels
 
             Tournament tournament = new Tournament()
             {
-                EntryFee = Parser.ParseDecimal(vm.EntryFee),
+                EntryFee = vm.EntryFee,
                 TournamentName = vm.TournamentName,
                 TournamentEntries = vm.TournamentEntries,
                 TournamentPrizes = vm.TournamentPrizes,

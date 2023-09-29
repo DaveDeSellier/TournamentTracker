@@ -1,8 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using TournamentTracker.Core;
-using TournamentTracker.Core.Interfaces;
-using TournamentTracker.Infrastructure;
-using TournamentTracker.Infrastructure.Services;
 using TournamentTracker.UI.Components;
 using TournamentTracker.UI.Pages;
 
@@ -15,7 +11,7 @@ namespace TournnamentTracker.Tests
         {
 
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
+            //Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -31,7 +27,7 @@ namespace TournnamentTracker.Tests
         public void Test_LoadTournamentButton_WhenNoTournamentIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
+            // Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -50,7 +46,7 @@ namespace TournnamentTracker.Tests
         public void Test_LoadTournamentButton_WhenTournamentIsSelected()
         {
             // Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
+            //Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 
@@ -79,7 +75,7 @@ namespace TournnamentTracker.Tests
         public void Test_CreateTournamentBtn_NavigationToCreateTournamentPage()
         {
             //Arrange
-            Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
+            // Services.AddSingleton<ITournament>(new TournamentService(new TournamentTrackerContext(), new TournamentLogic()));
             var navMan = Services.GetRequiredService<FakeNavigationManager>();
             var cut = RenderComponent<Index>();
 

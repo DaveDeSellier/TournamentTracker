@@ -26,7 +26,6 @@
     </EditForm>
 </div>
 
-@inherits AbstractComponent
 @inject IPrize _service
 
 @code {
@@ -39,29 +38,15 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    protected override void OnInitialized()
-    {
-        isVisible = false;
-        ErrorMessage = "";
-    }
 
     private async Task HandleSubmit()
     {
 
-        try
-        {
+        await OnClickCallBack.InvokeAsync(_prizeVM);
 
-            await OnClickCallBack.InvokeAsync(_prizeVM);
+        _prizeVM = new();
 
-            _prizeVM = new();
-
-            await OnClose.InvokeAsync();
-
-        } catch(Exception ex)
-        {
-            isVisible = true;
-            ErrorMessage = ex.Message;
-        }
+        await OnClose.InvokeAsync();
 
     }
 }
