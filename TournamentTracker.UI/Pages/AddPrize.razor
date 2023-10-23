@@ -1,0 +1,212 @@
+﻿@page "/createtournament/addprize"
+
+<Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage></Alert>
+<h1>Select a Prize</h1>
+
+<p class="bg-info p-2">Tournament: @TournamentState?.TournamentName</p>
+
+<div class="d-flex">
+    <div class="d-flex flex-column w-25 gap-2">
+            <select id="TeamList" class="form-select w-75 mb-2" @bind="_selectedPrize">
+                    <option disabled selected value> -- Select a prize -- </option>
+                    @foreach(var member in _prizeList)
+                    {
+                        <option>@member.PlaceName</option>
+                    }
+            </select>
+            <button id="btnAddPrize" @onclick="AddPrizeToSelectedList" class="btn btn-primary w-75" type="button">Add Prize</button>
+            <button id="btnNewPrize" @onclick="isPrizeFormVisible" class="btn btn-secondary w-75" type="button">New Prize</button>
+
+            @if (ShowPrizeForm)
+            {
+                <Modal Heading="Create Prize" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowPrizeForm">
+                    <CreatePrize OnClickCallBack="@AddPrizeToDropDown" OnClose="@CloseModal" />
+                </Modal>
+            }
+    </div>
+
+    @if (ShowSelectedPrizeList)
+    {
+        <div class="d-flex flex-column flex-fill">
+            <div style="min-height: 30rem; border:1px solid black;" class="flex-fill">
+                <div>
+                    <ul id="SelectedTeamList" class="m-0 p-0">
+                        @foreach (var prize in _selectedPrizeList)
+                        {
+                            <li key="@prize.Id" class="d-flex gap-2 p-2">
+                                <button @onclick="@(() => RemoveSelectedPrize(prize.Id))" aria-label="Close" type="button" class="btn-close"></button>
+                                    @prize.PlaceName
+                                </li>
+                            }
+                        </ul>
+                </div>
+            </div>
+            <button @onclick="ToCheckOut" class="btn btn-outline-primary p-2">Next</button>
+        </div>
+
+    }
+
+</div>
+
+@inherits AbstractComponent
+@inject TournamentVM TournamentState
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IPrize PrizeService
+@inject ILogger<AddPrize> Logger
+
+@code {
+
+    private bool ShowPrizeForm = false;
+    private bool ShowSelectedPrizeList = false;
+    private string? _selectedPrize;
+    private List<PrizeVM> _selectedPrizeList = new();
+    private List<PrizeVM> _prizeList = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+
+            var prizes = await PrizeService.List();
+
+            foreach (var prize in prizes)
+            {
+                _prizeList.Add(new PrizeVM(prize));
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to retrieve prizes";
+            Logger.LogError($"{guid}: Failed to retrieve prizes {ex.Message} {ex.StackTrace}");
+        }
+
+    }
+
+    private void AddPrizeToSelectedList() 
+    { 
+        if (_selectedPrize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Please select a prize!";
+            return;
+        };
+
+        var prize = _prizeList.Find(x => x.PlaceName == _selectedPrize);
+
+        if (prize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize does not exist";
+            return;
+        }
+
+        if (_selectedPrizeList.Contains(prize))
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize has already been selected";
+            return;
+        }
+
+        _selectedPrizeList.Add(prize);
+
+        ShowSelectedPrizeList = true;
+
+    }
+
+    private void AddPrizeToDropDown(PrizeVM prize)
+    {
+        _prizeList.Add(prize);
+    }
+
+    private void isPrizeFormVisible()
+    {
+
+        ShowPrizeForm = true;
+    }
+
+    private void RemoveSelectedPrize(int id)
+    {
+
+        isVisible = true;
+        ErrorMessage = string.Empty;
+
+        var prize = _selectedPrizeList.Find(x => x.Id == id);
+
+        if (prize == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Prize does not exist";
+            return;
+        }
+
+        _selectedPrizeList.Remove(prize);
+
+        ShowSelectedPrizeList = _selectedPrizeList.Count > 0;
+
+    }
+
+
+    public void ToCheckOut()
+    {
+        isVisible = true;
+        ErrorMessage = string.Empty;
+        List<TournamentPrize> prizes = new();
+
+        if (_selectedPrizeList.Count == 0)
+        {
+            isVisible = true;
+            ErrorMessage = "You must select a prize";
+            return;
+        }
+
+
+        foreach (var prize in _selectedPrizeList)
+        {
+
+            var tournamentPrize = new TournamentPrize()
+            {
+                    Prize = PrizeVM.CreatePrize(prize),
+                  
+                };
+
+            prizes.Add(tournamentPrize);
+
+        }
+   
+        TournamentState.TournamentPrizes = prizes;
+
+        Navigation.NavigateTo("/createtournament/checkout");
+
+    }
+
+    private async Task OpenModal()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+      
+    }
+
+    private async Task CloseModal()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        if (ShowPrizeForm) ShowPrizeForm = !ShowPrizeForm;
+
+       await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+       
+    }
+
+}

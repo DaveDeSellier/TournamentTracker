@@ -1,0 +1,419 @@
+﻿@page "/tournament/{Id:int}"
+
+<PageTitle>Tournament</PageTitle>
+
+@if (isVisible)
+{
+    <Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage />
+}
+
+@if (isLoading)
+{
+    <p>Loading...</p>    
+}
+
+<div class="d-flex flex-column">
+    <h1>Tournament:@_tournamentVM?.TournamentName</h1>
+    <div class="form w-25">
+        <label class="form-label">Round</label>
+        <select @onchange="RoundChange" class="form-select">
+                <option disabled selected value> -- select an option -- </option>
+                @foreach(var round in _rounds)
+                {
+                    <option value="@round">@round</option>
+                }
+        </select>
+        @if (isChecked)
+        {
+            <input @onchange="CheckboxChanged" class="form-check-input" type="checkbox" id="checkbox" name="checkbox" checked>
+        }
+        else
+        {
+            <input @onchange="CheckboxChanged" class="form-check-input" type="checkbox" id="checkbox" name="checkbox">
+        }
+        <label class="form-check-label" for="checkbox">Unplayed Only</label>
+    </div>
+    <div style="min-height:50vh;" class="mt-3 d-flex gap-5">
+        <div class="flex-fill border h-auto">
+                @if(_tournamentVM.Matchups != null)
+                {
+                    <ul class="list-group">
+                        @foreach (var match in _matchUpList)
+                        {
+                            <li class="list-group-item">
+                                <button @onclick="@(() => UpdateTeams(match))" class="list-group-item list-group-item-action">@match.DisplayName</button>
+                            </li>
+                        }
+                    </ul>    
+                }
+        </div>
+        @if (_currentMatchup != null)
+        {
+            <div class="flex-fill align-self-center h-auto">
+                <h2>@_teamOne</h2>
+                <label>Score</label>
+                @if(_currentMatchup.WinnerId == null){
+                    <input @bind="@_scoreOfTeamOne" type="text" />
+                }
+                else
+                {
+                    <input @bind="@_scoreOfTeamOne" type="text" disabled/>
+                }
+                <div class="d-flex w-50 mt-3">
+                    <span class="text-center align-self-center flex-fill">-VS-</span>
+                    @if (_currentMatchup.WinnerId == null && _currentMatchup.MatchupEntries.All(matchup => matchup.TeamCompeting != null))
+                    {
+                        <button @onclick="SaveScore" class="btn btn-primary flex-shrink-1">Score</button>
+                    }else{
+                        <button @onclick="SaveScore" class="btn btn-primary flex-shrink-1" disabled>Score</button>
+                    }
+                </div>
+                <h2>@_teamTwo</h2>
+                <label>Score</label>
+                @if(_currentMatchup.WinnerId == null){
+                    <input @bind="@_scoreOfTeamTwo" type="text" />
+                }
+                else
+                {
+                    <input @bind="@_scoreOfTeamTwo" type="text" disabled/>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@inject ITournament TournamentService
+@inject IMatchup MatchupService
+@inject IMatchUpEntry MatchUpEntryService
+@inject ILogger<Tournament> Logger
+@inherits AbstractComponent
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private TournamentVM? _tournamentVM = new();
+    private bool isLoading = true;
+    private bool isChecked { get; set; } = false;
+    private List<int> _rounds = new();
+    private int _selectedRound { get; set; } = 0;
+    private List<MatchupVM> _matchUpList = new();
+    private MatchupVM? _currentMatchup = null;
+    private string _teamOne = string.Empty;
+    private string _teamTwo = string.Empty;
+    private int? _scoreOfTeamOne = null;
+    private int? _scoreOfTeamTwo = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var tournament = await TournamentService.List(new TournamentSpecification(Id));
+
+            if (tournament != null)
+            {
+                _tournamentVM = new TournamentVM(tournament[0], Id); 
+                isLoading = false;
+                _rounds = LoadRounds();
+            }
+        }
+        catch (Exception ex)
+        {
+            Guid guid = new Guid();
+            isVisible = true;
+            ErrorMessage = $"{guid}: Failed to load tournament";
+            Logger.LogError($"{guid}: Failed to load tournament {ex.Message} {ex.StackTrace}");
+
+        }
+
+    }
+
+    private void CheckboxChanged(ChangeEventArgs e)
+    {
+        isChecked = (bool)e.Value;
+        _matchUpList = CreateMatchUpList(_selectedRound);
+
+        _scoreOfTeamOne = null;
+        _scoreOfTeamTwo = null;
+        _teamOne = string.Empty;
+        _teamTwo = string.Empty;
+        _currentMatchup = null;
+
+    }
+
+    private async Task SaveScore()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            List<MatchupEntry> matchupEntry = new();
+            Matchup? matchup = null;
+
+            if (_currentMatchup != null)
+            {
+
+                matchup = await MatchupService.GetById(_currentMatchup.Id);
+                matchupEntry = await MatchUpEntryService.List(x => x.ParentMatchupId == _currentMatchup.Id);
+
+            }
+            {
+                isVisible = true;
+                ErrorMessage = $"Please select a matchup";
+                return;
+            }
+
+            //If matchup has yet to be determined 
+
+            if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries[0].TeamCompeting == null && _currentMatchup.MatchupEntries[1].TeamCompeting == null)
+            {
+                return;
+            }
+
+            //Bye matchup
+            if (matchup.MatchupEntries.Count == 1)
+            {
+                matchup.MatchupEntries[0].Score = null;
+                matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+                _currentMatchup.WinnerId = matchup.Winner.Id;
+
+
+                if (matchupEntry.Count > 0)
+                {
+                    matchupEntry[0].TeamCompeting = matchup.Winner;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
+                    await MatchUpEntryService.Edit(matchupEntry[0]);
+                }
+
+            }//Non-bye matchup
+            else if (matchup?.MatchupEntries.Count == 2 )
+            {
+
+                matchup.MatchupEntries[0].Score = _scoreOfTeamOne;
+                matchup.MatchupEntries[1].Score = _scoreOfTeamTwo;
+
+                if (_scoreOfTeamOne == null || _scoreOfTeamTwo == null)
+                {
+                    isVisible = true;
+                    ErrorMessage = "You must enter a score";
+                }
+
+                else if (_scoreOfTeamOne == _scoreOfTeamTwo)
+                {
+                    isVisible = true;
+                    ErrorMessage = "Scores cannot be equal";
+                }
+                else if (_scoreOfTeamOne > _scoreOfTeamTwo)
+                {
+                    matchup.Winner = matchup.MatchupEntries[0].TeamCompeting;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
+
+                }
+                else
+                {
+                    matchup.Winner = matchup.MatchupEntries[1].TeamCompeting;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
+                }
+
+                if (matchupEntry.Count > 0)
+                {
+                    matchupEntry[0].TeamCompeting = matchup.Winner;
+                    _currentMatchup.WinnerId = matchup.Winner.Id;
+                    await MatchUpEntryService.Edit(matchupEntry[0]);
+                }
+
+            }
+
+            //If there isn't a matchupEntry that means it's the last round
+            await MatchupService.Edit(matchup);
+
+            _matchUpList.Remove(_currentMatchup);
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to save score";
+            Logger.LogError($"{guid}: Failed to save score {ex.Message} {ex.StackTrace}");
+        }
+    }
+
+    private void RoundChange(ChangeEventArgs e)
+    {
+        if(e.Value == null) return;
+
+        int number;
+
+        bool success = int.TryParse(e.Value.ToString(), out number);
+
+        if (success)
+        {
+            _selectedRound = number;
+        }
+        else
+        {
+            _selectedRound = 0;
+        }
+
+        isChecked = true;
+        _matchUpList = CreateMatchUpList(_selectedRound);
+        _teamOne = string.Empty;
+        _teamTwo = string.Empty;
+        _scoreOfTeamOne = null;
+        _scoreOfTeamTwo = null;
+        _currentMatchup = null;
+    }
+
+    private List<int> LoadRounds()
+    {
+        List<int> rounds = new();
+        rounds.Add(1);
+
+        int currRound = 1;
+
+        foreach (var matchUps in _tournamentVM.Matchups)
+        {
+            if (matchUps.MatchupRound > currRound)
+            {
+                currRound = matchUps.MatchupRound;
+                rounds.Add(currRound);
+            }
+        }
+
+        return rounds;
+    }
+
+    private List<MatchupVM> CreateMatchUpList(int selectedRound)
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+        var matches = new List<MatchupVM>();
+
+        try
+        {
+            List<MatchupVM> result = new();
+            string s = string.Empty;
+            MatchupVM matchupVM;
+
+            if (selectedRound == 0) return result;
+
+            var matchupsInSelectedRound = _tournamentVM?.Matchups.Where(x => x.MatchupRound == selectedRound);
+
+            if (matchupsInSelectedRound == null) return result;
+
+            @foreach (var matchup in matchupsInSelectedRound)
+            {
+
+                matchupVM = new(matchup);
+
+                @foreach (var matchupEntry in matchup.MatchupEntries)
+                {
+                    //if (matchupEntry.TeamCompeting == null) break;
+
+                    MatchupEntryVM vm = new MatchupEntryVM(matchupEntry);
+
+                    if (matchup.MatchupEntries.Count < 2)
+                    {
+                        s = $"{matchupEntry.TeamCompeting?.TeamName} VS. Bye";
+                    }
+                    else
+                    {
+                        if (matchupEntry.TeamCompeting == null)
+                        {
+                            if (s.Length == 0)
+                            {
+                                s = "TBD" + s;
+                            }
+                            else
+                            {
+                                s = s + " VS. TBD";
+                            }
+                        }
+
+                        else if (s.Length != 0)
+                        {
+                            s = $"{s} VS. {matchupEntry.TeamCompeting.TeamName}";
+                        }
+                        else
+                        {
+                            s = $"{s} {matchupEntry.TeamCompeting.TeamName}";
+                        }
+                    }
+
+                    matchupVM.MatchupEntries.Add(vm);
+                }
+
+
+                matchupVM.DisplayName = s;
+                s = string.Empty;
+                result.Add(matchupVM);
+
+            }
+
+            if (isChecked)
+            {
+                matches = result.FindAll(x => x.WinnerId == null).ToList();
+            }
+            else
+            {
+                matches = result.FindAll(x => x.WinnerId != null).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to create match up list";
+            Logger.LogError($"{guid}: Failed to create match up list {ex.Message} {ex.StackTrace}");
+        }
+
+        return matches;
+
+    }
+
+    private void UpdateTeams(MatchupVM match)
+    {
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            _currentMatchup = match;
+            _scoreOfTeamOne = null;
+            _scoreOfTeamTwo = null;
+
+            if (_currentMatchup.MatchupEntries.Count == 0 || _currentMatchup.MatchupEntries.All(matchup => matchup.TeamCompeting == null))
+            {
+                _teamOne = "TBD";
+                _teamTwo = "TBD";
+            }
+            else if (_currentMatchup.MatchupEntries.Count == 1)
+            {
+                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName;
+                _teamTwo = "Bye";
+                _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
+            }
+            else
+            {
+                _teamOne = _currentMatchup.MatchupEntries[0].TeamCompeting != null ? _currentMatchup.MatchupEntries[0].TeamCompeting.TeamName : string.Empty;
+                _teamTwo = _currentMatchup.MatchupEntries[1].TeamCompeting != null ? _currentMatchup.MatchupEntries[1].TeamCompeting.TeamName : "TBD";
+                _scoreOfTeamOne = _currentMatchup.MatchupEntries[0].Score;
+                _scoreOfTeamTwo = _currentMatchup.MatchupEntries[1].Score;
+            }
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to update team list";
+            Logger.LogError($"{guid}: Faile to update team list {ex.Message} {ex.StackTrace}");
+        }
+    }
+}

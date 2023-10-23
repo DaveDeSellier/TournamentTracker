@@ -1,0 +1,232 @@
+﻿@page "/createtournament/addteam"
+
+<Alert IsVisible=@isVisible ErrorMessage=@ErrorMessage></Alert>
+
+<h1>Select Your Teams</h1>
+
+<p class="bg-info p-2">Tournament: @TournamentState?.TournamentName</p>
+
+<div class="d-flex">
+    <div class="d-flex flex-column w-25 gap-2">
+            <select id="TeamList" class="form-select w-75 mb-2" @bind="_selectedTeam">
+                    <option disabled selected value> -- Select a team -- </option>
+                    @foreach(var member in _teamList)
+                    {
+                        <option>@member.TeamName</option>
+                    }
+            </select>
+            <button id="btnAddTeamToList" @onclick="AddTeamToList" class="btn btn-primary w-75" type="button">Add Team</button>
+            <button id="btnNewTeam" @onclick="isTeamFormVisible" class="btn btn-secondary w-75" type="button">New Team</button>
+
+            @if (ShowTeamForm)
+            {
+                <Modal Heading="Create Team" CloseModal="@CloseModal" OpenModal="@OpenModal" ShowModal="@ShowTeamForm">
+                    <CreateTeam OnClickCallBack="@AddNewTeam" OnClose="@CloseModal" />
+                </Modal>
+            }
+    </div>
+
+    @if (ShowSelectedTeamList)
+    {
+        <div class="d-flex flex-column flex-fill">
+            <div style="min-height: 30rem; border:1px solid black;" class="flex-fill">
+                <div>
+                    <ul id="SelectedTeamList" class="m-0 p-0">
+                        @foreach (var team in _selectedTeamList)
+                        {
+                            <li key="@team.Id" class="d-flex gap-2 p-2">
+                                <button @onclick="@(() => RemoveSelectedTeam(team.Id))" aria-label="Close" type="button" class="btn-close"></button>
+                                    @team.TeamName
+                                </li>
+                            }
+                        </ul>
+                </div>
+            </div>
+            <button @onclick="ToPrizePage" class="btn btn-outline-primary p-2">Next</button>
+        </div>
+
+    }
+
+</div>
+
+
+@inherits AbstractComponent
+@inject NavigationManager Navigation
+@inject IPrize PrizeService
+@inject ITeam TeamService
+@inject TournamentVM TournamentState
+@inject IJSRuntime JS
+@inject ILogger<AddTeam> Logger
+
+@code {
+
+    private List<TeamVM> _teamList = new();
+
+    private List<TeamVM> _selectedTeamList = new();
+
+    private List<PrizeVM> _prizeList = new();
+
+    private List<PrizeVM> _selectedPrizeList = new();
+
+    private bool ShowSelectedTeamList = false;
+    private string? _selectedTeam;
+    private string? _selectedPrize;
+    private bool ShowTeamForm = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var teams = await TeamService.GetAllTeams();
+
+            foreach (var team in teams)
+            {
+                _teamList.Add(new TeamVM(team));
+            }
+
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            Guid guid = new Guid();
+            ErrorMessage = $"{guid}: Failed to retrieve teams";
+            Logger.LogError($"{guid}: Failed to retrieve teams {ex.Message} {ex.StackTrace}");
+        }
+
+    }
+
+    private void AddTeamToList()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        if (_selectedTeam == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Please select a team!";
+            return;
+        }
+
+        var team = _teamList.Find(x => x.TeamName == _selectedTeam);
+
+        if (team == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Team could not be found!";
+            return;
+        }
+
+        if (_selectedTeamList.Contains(team))
+        {
+
+            isVisible = true;
+            ErrorMessage = $"Team has already been selected!";
+            return;
+        }
+
+        _selectedTeamList.Add(team);
+
+        ShowSelectedTeamList = _selectedTeamList.Count > 0;
+
+    }
+
+    private void isTeamFormVisible()
+    {
+        ShowTeamForm = true;
+    }
+
+    private void AddNewTeam(TeamVM team)
+    {
+        _teamList.Add(team);
+    }
+
+    public virtual async Task OpenModal()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            await JS.InvokeVoidAsync("ShowModal", "staticBackdrop");
+        }
+        catch (Exception ex)
+        {
+            isVisible = true;
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    public virtual async Task CloseModal()
+    {
+
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        ShowTeamForm = !ShowTeamForm;
+
+        await JS.InvokeVoidAsync("CloseModal", "staticBackdrop");
+
+    }
+
+
+    private void RemoveSelectedTeam(int id)
+    {
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        var team = _selectedTeamList.Find(x => x.Id == id);
+
+        if (team == null)
+        {
+            isVisible = true;
+            ErrorMessage = $"Team could not be found!";
+            return;
+        }
+
+        _selectedTeamList.Remove(team);
+
+        ShowSelectedTeamList = _selectedTeamList.Count > 0;
+
+    }
+
+    private void ToPrizePage()
+    {
+
+        List<TournamentEntry> entries = new();
+        isVisible = false;
+        ErrorMessage = string.Empty;
+
+        if (_selectedTeamList.Count < 2)
+        {
+
+            isVisible = true;
+            ErrorMessage = "Please select more than one team!";
+            return;
+
+        }
+
+        foreach (TeamVM team in _selectedTeamList)
+        {
+
+            var entry = new TournamentEntry()
+                {
+                    Team = TeamVM.CreateTeam(team)
+                };
+
+            entries.Add(entry);
+        }
+
+        TournamentState.TournamentEntries = entries;
+
+        Navigation.NavigateTo("/createtournament/addprize");
+
+    }
+
+
+}

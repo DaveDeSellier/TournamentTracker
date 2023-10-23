@@ -1,0 +1,20 @@
+﻿@if (IsVisible)
+{
+    <div class="alert alert-danger">
+
+        <span>@ErrorMessage</span>
+
+    </div>
+
+}
+
+@code {
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+
+    [Parameter]
+    public string ErrorMessage { get; set; }
+
+}

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>67f18f11-5e0a-4af1-9a01-d04e9af61e18</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Scripts\Create DB.sql" />
+    <None Remove="Scripts\Create Tables.sql" />
+    <None Remove="Scripts\Script0000 - Create DB.sql" />
+    <None Remove="Scripts\Script0001-Create Tables.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Create DB.sql" />
+    <EmbeddedResource Include="Scripts\Create Tables.sql" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="dbup-core" Version="5.0.10" />
+    <PackageReference Include="dbup-sqlserver" Version="5.0.8" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+  </ItemGroup>
+
+
+</Project>

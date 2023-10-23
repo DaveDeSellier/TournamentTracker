@@ -1,0 +1,47 @@
+﻿<PageTitle>Create Prize</PageTitle>
+
+<div>
+    <EditForm Model="@_prizeVM" OnValidSubmit="@HandleSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="form-group">
+                <label>PlaceNumber: </label>
+            <InputText id="placeNumber" class="form-control" @bind-Value="_prizeVM.PlaceNumber" />
+                <label>PlaceName: </label>
+            <InputText id="placeName" class="form-control" @bind-Value="_prizeVM.PlaceName" />
+                <label>Prize Amount: </label>
+            <InputText id="prizeAmount" class="form-control" @bind-Value="_prizeVM.PrizeAmount" />
+            <p class="m-1">Or...</p>
+            <label>Prize Percentage: </label>
+            <InputText id="prizePercentage" class="form-control" @bind-Value="_prizeVM.PrizePercentage" />
+        </div>
+        <div class="mt-1"> 
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </EditForm>
+</div>
+
+@inject IPrize _service
+
+@code {
+
+    private PrizeVM _prizeVM = new();
+
+    [Parameter]
+    public EventCallback<PrizeVM> OnClickCallBack { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+
+    private async Task HandleSubmit()
+    {
+
+        await OnClickCallBack.InvokeAsync(_prizeVM);
+
+        _prizeVM = new();
+
+        await OnClose.InvokeAsync();
+
+    }
+}

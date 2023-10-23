@@ -1,0 +1,45 @@
+﻿@if (ShowModal)
+{
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h2 class="modal-title text-white" id="staticBackdropLabel">@Heading</h2>
+                    <button @onclick="@CloseModal" aria-label="Close" type="button" class="btn-close btn-close-white"></button>
+                </div>
+                <div class="modal-body">
+                    @ChildContent
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@inject IJSRuntime JS
+
+@code {
+
+    [Parameter]
+    public bool ShowModal { get; set; } = false;
+
+    [Parameter]
+    public EventCallback CloseModal { get; set; }
+
+    [Parameter]
+    public EventCallback OpenModal { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Heading { get; set; } 
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await OpenModal.InvokeAsync();
+        }
+    }
+
+}

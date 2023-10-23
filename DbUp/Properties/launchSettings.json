@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DbUp": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
