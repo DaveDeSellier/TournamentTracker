@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+    webapp:
+        image: tournamenttracker_tournamenttracker.ui:latest
+        ports:
+            - "8001:80"
+        depends_on:
+            - database
+        environment:
+            ConnectionStrings__DefaultConnection: Server=localhost,1433;Database=TournamentTracker;User=sa;Password=thisIsAStrongPassWord!1029923;
+
+    database:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        container_name: mssql_server
+        environment:
+            ACCEPT_EULA: Y
+            SA_PASSWORD: thisIsAStrongPassWord!1029923
+        ports:
+            - "1433:1433"
+        networks:
+            - webappnet
+
+networks:
+    webappnet:

@@ -1,10 +1,9 @@
-﻿
-using DbUp;
+﻿using DbUp;
 using System.Reflection;
 
-var connectionString =
-    args.FirstOrDefault()
-    ?? "Server=local,1433; Database=TournamentTracker;User Id=sa; Password=YourStrong(!)Password; Trusted_connection=true";
+var connectionString = args.FirstOrDefault();
+
+EnsureDatabase.For.SqlDatabase(connectionString);
 
 var upgrader =
     DeployChanges.To

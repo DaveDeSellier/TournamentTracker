@@ -23,6 +23,7 @@ builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<TournamentLogic>();
 builder.Services.AddScoped<TournamentVM>();
 
+
 var logger = new LoggerConfiguration()
 .ReadFrom.Configuration(builder.Configuration)
 .CreateLogger();
