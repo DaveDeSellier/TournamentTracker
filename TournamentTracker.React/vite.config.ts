@@ -8,6 +8,15 @@ dns.setDefaultResultOrder('verbatim');
 export default defineConfig({
   plugins: [react()],
   server: {
+    cors: { origin: "localhost:7238" },
+    proxy: {
+      'api': {
+        target: 'https://localhost:7238',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      }
+    },
     host: 'localhost',
     port: 3000
   },
