@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import GetTournaments, {
     ITournamentModel,
     ITournaments,
@@ -10,7 +11,9 @@ function TournamentList({ tournaments }: ITournaments) {
     }
 
     const listItems = tournaments?.map((tournament) => (
-        <option>{tournament.tournamentName}</option>
+        <option key={tournament.id} value={tournament.id}>
+            {tournament.tournamentName}
+        </option>
     ));
     return listItems;
 }
@@ -19,6 +22,10 @@ export default function Home() {
     const [data, setData] = useState<ITournamentModel[]>(
         new Array<ITournamentModel>()
     );
+
+    const navigate = useNavigate();
+
+    const [selectedTournament, setTournament] = useState<string>();
 
     const fetchData = async () => {
         const result = await GetTournaments("api/Home");
@@ -29,11 +36,14 @@ export default function Home() {
         fetchData();
     }, []);
 
-    const handleLoadTournament = (e: React.MouseEvent<HTMLButtonElement>) => {};
+    const handleLoadTournament = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+    };
 
-    const handleCreateTournament = (
-        e: React.MouseEvent<HTMLButtonElement>
-    ) => {};
+    const handleCreateTournament = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        navigate("/createtournament", { replace: false });
+    };
 
     return (
         <>
@@ -44,7 +54,10 @@ export default function Home() {
                 <h1>Tournament Dashboard</h1>
                 <div className="">
                     <label>Load Existing Tournament</label>
-                    <select className="form-select">
+                    <select
+                        className="form-select"
+                        onChange={(e) => setTournament(e.target.value)}
+                    >
                         <option defaultValue="-- select an option --">
                             -- select an option --
                         </option>
