@@ -20,13 +20,15 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TournamentTrackerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConn")));
 builder.Services.AddTransient<ITournament, TournamentService>();
+builder.Services.AddTransient<IPrize, PrizeService>();
 builder.Services.AddTransient<TournamentLogic>();
 
 var app = builder.Build();
