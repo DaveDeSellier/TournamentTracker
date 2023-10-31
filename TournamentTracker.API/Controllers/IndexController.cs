@@ -18,8 +18,8 @@ namespace TournamentTracker.API.Controllers
         }
 
         // GET: api/<ValuesController>
-        [HttpGet]
-        public async Task<ActionResult<List<Tournament>>> Get()
+        [HttpGet(Name = nameof(GetTournaments))]
+        public async Task<ActionResult<List<Tournament>>> GetTournaments()
         {
 
             var tournaments = await _tournamentService.List();
@@ -38,14 +38,7 @@ namespace TournamentTracker.API.Controllers
         public async Task<ActionResult<Tournament>> GetTournamentById(int id)
         {
 
-            var tournament = await _tournamentService.GetById(id);
-
-            if (tournament == null)
-            {
-                return NotFound();
-            }
-
-            return tournament;
+            throw new NotImplementedException();
         }
 
     }
