@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using TournamentTracker.API.Filter;
+using TournamentTracker.API.Filters;
 using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
@@ -20,7 +22,12 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ExceptionFilter>();
+    options.Filters.Add<HttpFilter>();
+
+})
     .AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -40,7 +47,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+//Do not allow http request to redirect to https. Instead refuse HTTP connections.
+//app.UseHttpsRedirection();
 
 app.UseCors();
 
