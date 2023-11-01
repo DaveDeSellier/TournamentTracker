@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import GetTournaments, {
+import {
+    GetAll,
     ITournamentModel,
     ITournaments,
 } from "../services/TournamentService";
@@ -28,7 +29,7 @@ export default function Home() {
     const [selectedTournament, setTournament] = useState<string>();
 
     const fetchData = async () => {
-        const result = await GetTournaments("api/Home");
+        const result = await GetAll("api/Home");
         setData(result);
     };
 

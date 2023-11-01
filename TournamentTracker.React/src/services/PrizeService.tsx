@@ -1,16 +1,18 @@
 const api: string = import.meta.env.VITE_API;
 
-export interface ITournamentModel {
-    entryFee?: number;
-    tournamentName?: string;
+interface IPrizeModel {
     id?: number;
+    placeNumber?: number;
+    placeName?: string;
+    prizeAmount?: number;
+    prizePercentage?: number;
 }
 
-export interface ITournaments {
-    tournaments?: ITournamentModel[];
+interface IPrizes {
+    prizes: IPrizeModel[];
 }
 
-async function FetchData(uri: string): Promise<ITournamentModel[]> {
+async function FetchData(uri: string): Promise<IPrizes[]> {
     const url: string = `${api}/${uri}`;
 
     try {
@@ -25,7 +27,7 @@ async function FetchData(uri: string): Promise<ITournamentModel[]> {
     }
 }
 
-async function PostData(uri: string, data: ITournamentModel) {
+async function PostData(uri: string, data: IPrizeModel) {
     const url: string = `${api}/${uri}`;
 
     try {
@@ -50,14 +52,4 @@ async function PostData(uri: string, data: ITournamentModel) {
     } catch (e) {
         throw new Error("Error");
     }
-}
-
-export async function GetAll(uri: string): Promise<ITournamentModel[]> {
-    const tournamentData = await FetchData(uri);
-    return tournamentData;
-}
-
-export async function Create(uri: string, data: ITournamentModel) {
-    const response = await PostData(uri, data);
-    return response;
 }
