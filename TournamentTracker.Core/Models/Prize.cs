@@ -1,4 +1,5 @@
-﻿using TournamentTracker.Core.Models.Abstract;
+﻿using System.Text.Json.Serialization;
+using TournamentTracker.Core.Models.Abstract;
 
 namespace TournamentTracker.Core.Models;
 
@@ -13,5 +14,6 @@ public class Prize : BaseModel
 
     public double PrizePercentage { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<TournamentPrize> TournamentPrizes { get; set; } = new List<TournamentPrize>();
 }
