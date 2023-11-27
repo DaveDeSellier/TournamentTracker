@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
+using NSwag.Annotations;
 
 namespace TournamentTracker.API.Models
 {
-    public abstract class Resource
+    //Use for Hateoas
+    public abstract class Resource : Link
     {
-        [JsonProperty(Order = -2)] //Set the property to the top of the JSON
-        public string Href { get; set; } = null!;
+        [OpenApiIgnore]
+        [JsonIgnore]
+        public Link Self { get; set; } = default!;
     }
 }
