@@ -5,8 +5,6 @@
 
         public int Id { get; set; }
 
-        public int TournamentId { get; set; }
-
-        public int PrizeId { get; set; }
+        public PrizeResource Prize { get; set; } = default!;
     }
 }

@@ -22,7 +22,11 @@ namespace TournamentTracker.Infrastructure.Services
 
             var tournament = await _context.Tournaments
                 .Include(x => x.TournamentEntries)
+                .ThenInclude(teams => teams.Team)
+                //.ThenInclude(teamsMembers => teamsMembers.TeamMembers)
+                //.ThenInclude(person => person.Person)
                 .Include(x => x.TournamentPrizes)
+                .ThenInclude(prizes => prizes.Prize)
                 .Include(x => x.Matchups)
                 .Where(x => x.Id == id)
                 .FirstAsync();

@@ -1,8 +1,9 @@
-﻿namespace TournamentTracker.Core.Models;
+﻿using TournamentTracker.Core.Models.Abstract;
 
-public partial class TournamentPrize
+namespace TournamentTracker.Core.Models;
+
+public partial class TournamentPrize : BaseModel
 {
-    public int Id { get; set; }
 
     public int TournamentId { get; set; }
 

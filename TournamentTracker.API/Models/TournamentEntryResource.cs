@@ -2,9 +2,9 @@
 {
     public class TournamentEntryResource
     {
-        public int TournamentId { get; set; }
+        public int Id { get; set; }
 
-        public int TeamId { get; set; }
+        public TeamResource Team { get; set; } = default!;
 
     }
 }
