@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TournamentTracker.API.Filter;
 using TournamentTracker.API.Filters;
+using TournamentTracker.API.Mapper;
 using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Infrastructure;
@@ -26,17 +27,23 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ExceptionFilter>();
     options.Filters.Add<HttpFilter>();
+    options.Filters.Add<LinkRewritingFilter>();
 
 })
-    .AddNewtonsoftJson();
+    .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen().AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddDbContext<TournamentTrackerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConn")));
-builder.Services.AddTransient<ITournament, TournamentService>();
-builder.Services.AddTransient<IPrize, PrizeService>();
-builder.Services.AddTransient<TournamentLogic>();
+builder.Services.AddScoped<ITournament, TournamentService>();
+builder.Services.AddScoped<IPrize, PrizeService>();
+builder.Services.AddScoped<IMatchup, MatchupService>();
+builder.Services.AddScoped<ITeamMember, TeamMemberService>();
+builder.Services.AddScoped<ITeam, TeamService>();
+builder.Services.AddScoped<TournamentLogic>();
+builder.Services.AddAutoMapper(options => options.AddProfile<MappingProfile>());
 
 var app = builder.Build();
 
