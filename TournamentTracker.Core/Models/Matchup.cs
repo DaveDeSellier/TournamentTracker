@@ -13,7 +13,7 @@ public class Matchup : BaseModel
 
     public virtual List<MatchupEntry> MatchupEntries { get; set; } = new List<MatchupEntry>();
 
-    public virtual Tournament Tournament { get; set; } = new();
+    public virtual Tournament Tournament { get; set; } = null!;
 
     public virtual Team? Winner { get; set; }
 }
