@@ -23,6 +23,15 @@ namespace TournamentTracker.Infrastructure.Services
                     .ToListAsync();
         }
 
+        public override async Task<Team?> GetById(int id)
+        {
+            return await _context.Teams
+                    .Include(teams => teams.TeamMembers)
+                    .ThenInclude(teamMembers => teamMembers.Person)
+                    .Where(teams => teams.Id == id)
+                    .FirstOrDefaultAsync();
+        }
+
         public async Task<Team> AddTeamAsync(Team team)
         {
 

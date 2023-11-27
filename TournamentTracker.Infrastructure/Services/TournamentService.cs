@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TournamentTracker.Core;
 using TournamentTracker.Core.Interfaces;
 using TournamentTracker.Core.Models;
@@ -14,6 +15,20 @@ namespace TournamentTracker.Infrastructure.Services
         {
             _context = context;
             _tournamentLogic = tournamentLogic;
+        }
+
+        public override async Task<Tournament?> GetById(int id)
+        {
+
+            var tournament = await _context.Tournaments
+                .Include(x => x.TournamentEntries)
+                .Include(x => x.TournamentPrizes)
+                .Include(x => x.Matchups)
+                .Where(x => x.Id == id)
+                .FirstAsync();
+
+            return tournament;
+
         }
 
         public async Task InsertTournament(Tournament tournament)
